@@ -1,0 +1,2299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>নিশীথ নদী — THE MIDNIGHT RIVER | Bad Time Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+Bengali:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    :root {
+      --midnight-blue: #07111F;
+      --river-black: #030A12;
+      --moon-silver: #B4C7D3;
+      --atmos-blue: #28445B;
+      --lantern-amber: #E8A453;
+      --glass-bg: rgba(7, 17, 31, 0.62);
+      --glass-border: rgba(180, 199, 211, 0.22);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--river-black);
+      color: var(--moon-silver);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #webgl-container {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      background: radial-gradient(circle at 50% 25%, #0c1d31 0%, #030A12 80%);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Subtle film grain & atmospheric vignette */
+    .vignette-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      background: radial-gradient(ellipse at center, rgba(3,10,18,0) 45%, rgba(3,10,18,0.68) 100%);
+    }
+
+    #fade-curtain {
+      position: fixed;
+      inset: 0;
+      background-color: var(--river-black);
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+
+    /* Opening Experience Overlay */
+    #opening-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: radial-gradient(circle at 50% 42%, rgba(7, 17, 31, 0.52) 0%, rgba(3, 10, 18, 0.88) 100%);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      transition: opacity 2.2s cubic-bezier(0.22, 1, 0.36, 1), visibility 2.2s;
+    }
+
+    #opening-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .opening-card {
+      max-width: 680px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: floatIn 2.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Official Bad Time Studio SVG Lockup */
+    .studio-logo-wrap {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 18px;
+      text-decoration: none;
+      color: var(--moon-silver);
+      transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+
+    .studio-logo-wrap:hover {
+      transform: translateY(-2px);
+      opacity: 0.95;
+    }
+
+    .studio-presents-tag {
+      font-size: 0.68rem;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: rgba(180, 199, 211, 0.72);
+      margin-top: 8px;
+      font-weight: 400;
+    }
+
+    .title-bengali {
+      font-family: 'Noto Serif Bengali', serif;
+      font-size: clamp(2.8rem, 7vw, 5.1rem);
+      font-weight: 600;
+      color: #dce8f0;
+      line-height: 1.15;
+      letter-spacing: 0.02em;
+      text-shadow: 0 8px 36px rgba(3, 10, 18, 0.95), 0 0 28px rgba(180, 199, 211, 0.18);
+      margin-bottom: 6px;
+    }
+
+    .title-english {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.05rem, 2.5vw, 1.55rem);
+      font-weight: 400;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--moon-silver);
+      margin-bottom: 18px;
+    }
+
+    .subtitle-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1rem, 2vw, 1.28rem);
+      color: rgba(180, 199, 211, 0.84);
+      letter-spacing: 0.04em;
+      margin-bottom: 36px;
+    }
+
+    .enter-btn {
+      position: relative;
+      appearance: none;
+      background: rgba(7, 17, 31, 0.68);
+      color: #f3e6d3;
+      border: 1px solid rgba(232, 164, 83, 0.55);
+      border-radius: 999px;
+      padding: 15px 42px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 0 28px rgba(232, 164, 83, 0.18), inset 0 0 14px rgba(232, 164, 83, 0.08);
+      transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      margin-bottom: 38px;
+    }
+
+    .enter-btn:hover, .enter-btn:focus-visible {
+      background: rgba(232, 164, 83, 0.16);
+      border-color: var(--lantern-amber);
+      box-shadow: 0 0 38px rgba(232, 164, 83, 0.38), inset 0 0 18px rgba(232, 164, 83, 0.18);
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .opening-credits-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(180, 199, 211, 0.68);
+    }
+
+    .credit-links-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .credit-link {
+      color: var(--moon-silver);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(180, 199, 211, 0.28);
+      padding-bottom: 2px;
+      transition: color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .credit-link:hover, .credit-link:focus-visible {
+      color: var(--lantern-amber);
+      border-color: var(--lantern-amber);
+      outline: none;
+    }
+
+    .dot-sep {
+      color: rgba(232, 164, 83, 0.6);
+    }
+
+    /* End Credit Sequence Overlay (60s - 71s) */
+    #end-credit-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 8;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      background: radial-gradient(circle at center, rgba(3, 10, 18, 0.42) 0%, rgba(3, 10, 18, 0.74) 100%);
+      opacity: 0;
+      transition: opacity 2.5s ease;
+    }
+
+    #end-credit-overlay.visible {
+      opacity: 1;
+    }
+
+    .end-credit-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .end-presents {
+      font-size: 0.68rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: rgba(180, 199, 211, 0.72);
+      margin-top: 4px;
+    }
+
+    .end-bn-title {
+      font-family: 'Noto Serif Bengali', serif;
+      font-size: clamp(2.1rem, 4.5vw, 3.3rem);
+      color: #e2edf5;
+      font-weight: 600;
+      margin: 4px 0;
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9);
+    }
+
+    .end-creator {
+      font-size: 0.78rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--lantern-amber);
+      margin-top: 6px;
+    }
+
+    /* Top & Bottom Interactive HUD */
+    #hud-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 12;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 24px;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    #hud-layer.active {
+      opacity: 1;
+    }
+
+    #hud-layer.ui-hidden .hud-fadeable {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .hud-top, .hud-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .glass-pill {
+      pointer-events: auto;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 999px;
+      padding: 8px 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--moon-silver);
+      transition: opacity 0.45s ease, border-color 0.3s ease, background 0.3s ease;
+    }
+
+    .amber-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--lantern-amber);
+      box-shadow: 0 0 10px var(--lantern-amber);
+      animation: pulseDot 2.4s infinite ease-in-out;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 0.55; transform: scale(0.92); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+
+    .hud-controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hud-btn {
+      pointer-events: auto;
+      appearance: none;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: var(--moon-silver);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.25s ease;
+    }
+
+    .hud-btn:hover, .hud-btn:focus-visible {
+      border-color: rgba(232, 164, 83, 0.65);
+      color: #fff;
+      background: rgba(20, 36, 56, 0.78);
+      outline: none;
+    }
+
+    .hud-btn.active-mode {
+      border-color: var(--lantern-amber);
+      color: var(--lantern-amber);
+      box-shadow: 0 0 16px rgba(232, 164, 83, 0.2);
+    }
+
+    /* Bottom Timeline Scrubber */
+    .scrubber-bar {
+      pointer-events: auto;
+      flex: 1;
+      min-width: 280px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 999px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: opacity 0.45s ease;
+    }
+
+    .timecode-text {
+      font-variant-numeric: tabular-nums;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--lantern-amber);
+      white-space: nowrap;
+    }
+
+    .chapter-badge {
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(180, 199, 211, 0.9);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 290px;
+    }
+
+    .timeline-slider-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    #timeline-slider {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(40, 68, 91, 0.75);
+      outline: none;
+      cursor: pointer;
+    }
+
+    #timeline-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--lantern-amber);
+      box-shadow: 0 0 10px var(--lantern-amber);
+      cursor: pointer;
+    }
+
+    /* Explore Mode Hint Pill */
+    #explore-hint {
+      position: fixed;
+      top: 74px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 11;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    #explore-hint.visible {
+      opacity: 1;
+    }
+
+    /* Accessible Credits Modal */
+    #credits-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: rgba(3, 10, 18, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+
+    #credits-modal.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .credits-dialog {
+      max-width: 520px;
+      width: 100%;
+      background: linear-gradient(160deg, rgba(7, 17, 31, 0.94) 0%, rgba(3, 10, 18, 0.97) 100%);
+      border: 1px solid rgba(180, 199, 211, 0.25);
+      border-radius: 24px;
+      padding: 36px 32px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85), 0 0 40px rgba(232, 164, 83, 0.08);
+    }
+
+    .close-modal-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: rgba(40, 68, 91, 0.3);
+      border: 1px solid rgba(180, 199, 211, 0.22);
+      color: var(--moon-silver);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+    }
+
+    .close-modal-btn:hover, .close-modal-btn:focus-visible {
+      border-color: var(--lantern-amber);
+      color: var(--lantern-amber);
+      outline: none;
+    }
+
+    .modal-bn-title {
+      font-family: 'Noto Serif Bengali', serif;
+      font-size: 2.2rem;
+      color: #e2edf5;
+      margin-top: 14px;
+      margin-bottom: 4px;
+    }
+
+    .modal-en-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--moon-silver);
+      margin-bottom: 18px;
+    }
+
+    .modal-role-line {
+      font-size: 0.73rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--lantern-amber);
+      margin-bottom: 6px;
+    }
+
+    .modal-desc {
+      font-size: 0.84rem;
+      line-height: 1.65;
+      color: rgba(180, 199, 211, 0.78);
+      margin: 16px 0 24px;
+    }
+
+    .modal-links-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .modal-ext-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 18px;
+      border-radius: 14px;
+      background: rgba(40, 68, 91, 0.22);
+      border: 1px solid rgba(180, 199, 211, 0.22);
+      color: #e4eef5;
+      text-decoration: none;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all 0.28s ease;
+    }
+
+    .modal-ext-btn:hover, .modal-ext-btn:focus-visible {
+      border-color: var(--lantern-amber);
+      background: rgba(232, 164, 83, 0.12);
+      color: var(--lantern-amber);
+      outline: none;
+    }
+
+    /* WebGL Fallback Message */
+    #webgl-fallback {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: var(--river-black);
+      color: var(--moon-silver);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 32px;
+    }
+
+    @media (max-width: 720px) {
+      #hud-layer { padding: 12px 14px; }
+      .chapter-badge { display: none; }
+      .scrubber-bar { min-width: 100%; order: 2; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Reusable Official Bad Time Studio SVG Symbol Definition -->
+  <svg width="0" height="0" style="position:absolute; visibility:hidden;" aria-hidden="true">
+    <defs>
+      <g id="bad-time-studio-logo">
+        <!-- Geometric Ribbon 'B' Emblem (faithful to uploaded Bad Time Studio mark) -->
+        <path d="M 8 6 L 56 29 C 68 35 68 50 56 56 L 55 47 C 55 41 49 38 42 35 L 18 23 C 11 20 8 15 8 8 Z" fill="currentColor" />
+        <path d="M 8 33 L 56 56 C 68 62 68 77 56 84 L 55 75 C 55 68 49 65 42 62 L 18 50 C 11 47 8 42 8 35 Z" fill="currentColor" />
+        <path d="M 8 59 L 29 70 C 33 72 33 76 29 78 L 8 89 Z" fill="currentColor" />
+        <!-- Vertical Separator Line -->
+        <line x1="78" y1="4" x2="78" y2="91" stroke="currentColor" stroke-width="1.6" stroke-opacity="0.55" />
+        <!-- Stacked BAD TIME STUDIO Wordmark -->
+        <text x="92" y="45" fill="currentColor" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="30" letter-spacing="3.5">BAD TIME</text>
+        <text x="93" y="71" fill="currentColor" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="16.5" letter-spacing="5.5">STUDIO</text>
+        <text x="93" y="86" fill="currentColor" fill-opacity="0.62" font-family="'Plus Jakarta Sans', sans-serif" font-weight="400" font-size="6.3" letter-spacing="1.45">YOUR COMPETITORS ARE NOT GOING TO LIKE THIS</text>
+      </g>
+    </defs>
+  </svg>
+
+  <!-- 3D WebGL Viewport -->
+  <div id="webgl-container" aria-label="Interactive 3D Midnight River Scene"></div>
+  <div class="vignette-layer"></div>
+  <div id="fade-curtain"></div>
+
+  <!-- Opening Title Screen Overlay -->
+  <section id="opening-overlay" role="dialog" aria-labelledby="main-bn-title">
+    <div class="opening-card">
+      <a href="https://facebook.com/badTimeStudio/" target="_blank" rel="noopener noreferrer" class="studio-logo-wrap" aria-label="Bad Time Studio Facebook">
+        <svg width="240" height="72" viewBox="0 0 330 96" style="color: #dce8f0;">
+          <use href="#bad-time-studio-logo"></use>
+        </svg>
+        <span class="studio-presents-tag">BAD TIME STUDIO PRESENTS</span>
+      </a>
+
+      <h1 id="main-bn-title" class="title-bengali">নিশীথ নদী</h1>
+      <h2 class="title-english">THE MIDNIGHT RIVER</h2>
+      <p class="subtitle-quote">“Somewhere in Bangladesh, the river never sleeps.”</p>
+
+      <button id="enter-river-btn" type="button" class="enter-btn">
+        ENTER THE RIVER
+      </button>
+
+      <div class="opening-credits-block">
+        <span>A CINEMATIC EXPERIENCE BY K.I.ROHAN</span>
+        <div class="credit-links-row">
+          <a href="https://facebook.com/badTimeStudio/" target="_blank" rel="noopener noreferrer" class="credit-link">BAD TIME STUDIO</a>
+          <span class="dot-sep">•</span>
+          <a href="https://www.linkedin.com/in/kirohan/" target="_blank" rel="noopener noreferrer" class="credit-link">K.I.ROHAN</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subtle End-Credit Sequence (60s - 71s of the 75s loop) -->
+  <div id="end-credit-overlay" aria-hidden="true">
+    <div class="end-credit-inner">
+      <svg width="210" height="62" viewBox="0 0 330 96" style="color: #dce8f0;">
+        <use href="#bad-time-studio-logo"></use>
+      </svg>
+      <div class="end-presents">presents</div>
+      <div class="end-bn-title">নিশীথ নদী</div>
+      <div class="end-creator">Created by K.I.Rohan</div>
+    </div>
+  </div>
+
+  <!-- Explore Mode Hint -->
+  <div id="explore-hint" class="glass-pill">
+    <span>Drag or move pointer to look around the river • Press C for Cinematic Camera</span>
+  </div>
+
+  <!-- Interactive Viewing Controls HUD -->
+  <header id="hud-layer">
+    <div class="hud-top">
+      <div class="glass-pill hud-fadeable">
+        <span class="amber-dot"></span>
+        <span>12:17 AM • PADMA-MEGHNA ESTUARY</span>
+      </div>
+
+      <div class="hud-controls-group">
+        <button id="btn-cinematic" type="button" class="hud-btn hud-fadeable active-mode" title="Choreographed 75s Camera Sequence">
+          Cinematic Mode
+        </button>
+        <button id="btn-explore" type="button" class="hud-btn hud-fadeable" title="Interactive Free-Look Camera">
+          Explore Mode
+        </button>
+        <button id="btn-sound" type="button" class="hud-btn hud-fadeable" title="Toggle Spatial Sound Engine (M)">
+          <span id="sound-label">Sound: On</span>
+        </button>
+        <button id="btn-replay" type="button" class="hud-btn hud-fadeable" title="Replay 75s Experience from 00:00">
+          Replay
+        </button>
+        <button id="btn-fullscreen" type="button" class="hud-btn hud-fadeable" title="Toggle Fullscreen (F)">
+          Fullscreen
+        </button>
+        <button id="btn-credits" type="button" class="hud-btn hud-fadeable" title="View Studio & Creator Credits">
+          Credits
+        </button>
+        <button id="btn-hide-ui" type="button" class="hud-btn" title="Hide or Show Interface Controls (H)">
+          <span id="hide-ui-label">Hide UI</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="hud-bottom hud-fadeable">
+      <div class="scrubber-bar">
+        <span id="timecode-display" class="timecode-text">00:00 / 01:15</span>
+        <span id="chapter-display" class="chapter-badge">I. THE REVEAL — POST-RAIN STILLNESS</span>
+        <div class="timeline-slider-wrap">
+          <input id="timeline-slider" type="range" min="0" max="75" step="0.1" value="0" aria-label="Cinematic Timeline Scrubber" />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Accessible Credits Modal Panel -->
+  <div id="credits-modal" role="dialog" aria-modal="true" aria-labelledby="credits-modal-title">
+    <div class="credits-dialog">
+      <button id="close-credits-btn" type="button" class="close-modal-btn" aria-label="Close Credits Panel">✕</button>
+      <svg width="215" height="64" viewBox="0 0 330 96" style="color: #dce8f0;">
+        <use href="#bad-time-studio-logo"></use>
+      </svg>
+      <h2 id="credits-modal-title" class="modal-bn-title">নিশীথ নদী</h2>
+      <div class="modal-en-title">THE MIDNIGHT RIVER</div>
+      <div class="modal-role-line">A BAD TIME STUDIO EXPERIENCE</div>
+      <div class="modal-role-line" style="color: #dce8f0;">CREATED BY K.I.ROHAN</div>
+      <p class="modal-desc">
+        Set at 12:17 AM on a rural Bangladeshi river shortly after monsoon rainfall. Featuring custom GLSL Gerstner river shaders, an animated dingi nouka &amp; majhi, cantilevered khora jhal bamboo lift-nets, a distant midnight river launch, and a 9-layer procedural Web Audio spatial soundscape.
+      </p>
+      <div class="modal-links-stack">
+        <a href="https://facebook.com/badTimeStudio/" target="_blank" rel="noopener noreferrer" class="modal-ext-btn">
+          <span>Bad Time Studio — Facebook</span>
+          <span>↗</span>
+        </a>
+        <a href="https://www.linkedin.com/in/kirohan/" target="_blank" rel="noopener noreferrer" class="modal-ext-btn">
+          <span>K.I.Rohan — LinkedIn</span>
+          <span>↗</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graceful WebGL Fallback -->
+  <div id="webgl-fallback">
+    <div>
+      <h2 style="font-family:'Noto Serif Bengali',serif; font-size:2rem; margin-bottom:8px;">নিশীথ নদী — THE MIDNIGHT RIVER</h2>
+      <p>Your browser or device does not currently have WebGL enabled. Please enable hardware acceleration to experience the 3D river environment.</p>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // =========================================================================
+      // 1. STATE & CONSTANTS
+      // =========================================================================
+      const LOOP_DURATION = 75.0; // 75-second continuous single-take sequence
+      let hasEntered = false;
+      let isExploreMode = false;
+      let isSoundMuted = false;
+      let isUiHidden = false;
+      let isScrubbing = false;
+      let timelineSec = 0.0;
+      let lastFrameTime = performance.now();
+
+      // Pointer & Explore camera damping state
+      let pointerX = 0, pointerY = 0;
+      let smoothPointerX = 0, smoothPointerY = 0;
+      let isDragging = false;
+      let dragStartX = 0, dragStartY = 0;
+      let exploreYaw = 0, explorePitch = 0.05;
+      let targetExploreYaw = 0, targetExplorePitch = 0.05;
+
+      // Synchronized event trackers so SFX trigger cleanly at exact timeline moments
+      let lastOarCycleIndex = -1;
+      let lastTrapCycleIndex = -1;
+      let lastHornTriggerCycle = -1;
+      let lastBird1Cycle = -1;
+      let lastBird2Cycle = -1;
+      let lastClinkTime = 0;
+
+      // Reduced motion preference
+      const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // =========================================================================
+      // 2. 9-LAYER SPATIAL WEB AUDIO API ENGINE (100% PROCEDURAL)
+      // =========================================================================
+      class MidnightRiverSoundEngine {
+        constructor() {
+          this.ctx = null;
+          this.masterGain = null;
+          this.reverbNode = null;
+          this.boatPanner = null;
+          this.trapPanner = null;
+          this.launchPanner = null;
+          this.launchEngineGain = null;
+          this.isInitialized = false;
+        }
+
+        init() {
+          if (this.isInitialized) {
+            if (this.ctx && this.ctx.state === 'suspended') {
+              this.ctx.resume();
+            }
+            return;
+          }
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return;
+
+          this.ctx = new AudioCtx();
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.gain.setValueAtTime(0.01, this.ctx.currentTime);
+          this.masterGain.connect(this.ctx.destination);
+
+          // Fade in master soundscape smoothly over 3.2 seconds
+          this.masterGain.gain.linearRampToValueAtTime(isSoundMuted ? 0.0 : 0.88, this.ctx.currentTime + 3.2);
+
+          // Create 4.8-second river-valley convolution reverb impulse
+          this.reverbNode = this.ctx.createConvolver();
+          this.reverbNode.buffer = this.createRiverImpulseBuffer(4.8, 2.2);
+          const reverbGain = this.ctx.createGain();
+          reverbGain.gain.value = 0.48;
+          this.reverbNode.connect(reverbGain);
+          reverbGain.connect(this.masterGain);
+
+          // Shared noise buffer (8 seconds of stereo pink-ish noise)
+          this.noiseBuffer = this.createPinkNoiseBuffer(8.0);
+
+          // Layer 1: Gentle flowing Padma/Meghna river water
+          this.setupRiverWaterLayer();
+
+          // Layer 2: Small waves lapping against timber hull & ghat
+          this.setupWaveLappingLayer();
+
+          // Layer 3: Soft post-rain nighttime breeze
+          this.setupNightBreezeLayer();
+
+          // Layer 4: Distant crickets & marsh frogs on riverbank
+          this.setupCricketsAndFrogsLayer();
+
+          // Spatial Panners for Dynamic 3D Objects
+          this.boatPanner = this.createSpatialPanner(0, 0, -25);
+          this.trapPanner = this.createSpatialPanner(16, 2, -26);
+          this.launchPanner = this.createSpatialPanner(-35, 4, -95);
+
+          // Layer 8: Distant Launch Diesel Engine Chug (continuous, distance-modulated)
+          this.setupLaunchDieselLayer();
+
+          this.isInitialized = true;
+        }
+
+        createRiverImpulseBuffer(duration, decay) {
+          const sr = this.ctx.sampleRate;
+          const length = Math.floor(sr * duration);
+          const impulse = this.ctx.createBuffer(2, length, sr);
+          for (let ch = 0; ch < 2; ch++) {
+            const data = impulse.getChannelData(ch);
+            for (let i = 0; i < length; i++) {
+              const env = Math.pow(1 - i / length, decay);
+              data[i] = (Math.random() * 2 - 1) * env * 0.5;
+            }
+          }
+          return impulse;
+        }
+
+        createPinkNoiseBuffer(duration) {
+          const sr = this.ctx.sampleRate;
+          const length = Math.floor(sr * duration);
+          const buf = this.ctx.createBuffer(2, length, sr);
+          for (let ch = 0; ch < 2; ch++) {
+            const out = buf.getChannelData(ch);
+            let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+            for (let i = 0; i < length; i++) {
+              const white = Math.random() * 2 - 1;
+              b0 = 0.99886 * b0 + white * 0.0555179;
+              b1 = 0.99332 * b1 + white * 0.0750759;
+              b2 = 0.96900 * b2 + white * 0.1538520;
+              b3 = 0.86650 * b3 + white * 0.3104856;
+              b4 = 0.55000 * b4 + white * 0.5329522;
+              b5 = -0.7616 * b5 - white * 0.0168980;
+              out[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.035;
+              b6 = white * 0.115926;
+            }
+          }
+          return buf;
+        }
+
+        createSpatialPanner(x, y, z) {
+          const panner = this.ctx.createPanner();
+          panner.panningModel = 'HRTF';
+          panner.distanceModel = 'inverse';
+          panner.refDistance = 6;
+          panner.maxDistance = 140;
+          panner.rolloffFactor = 1.1;
+          panner.setPosition(x, y, z);
+          panner.connect(this.masterGain);
+          panner.connect(this.reverbNode);
+          return panner;
+        }
+
+        setupRiverWaterLayer() {
+          const src = this.ctx.createBufferSource();
+          src.buffer = this.noiseBuffer;
+          src.loop = true;
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.value = 260;
+          filter.Q.value = 0.7;
+
+          const lfo = this.ctx.createOscillator();
+          lfo.frequency.value = 0.14;
+          const lfoGain = this.ctx.createGain();
+          lfoGain.gain.value = 95;
+          lfo.connect(filter.frequency);
+          lfo.start();
+
+          const gain = this.ctx.createGain();
+          gain.gain.value = 0.26;
+
+          src.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.masterGain);
+          src.start();
+        }
+
+        setupWaveLappingLayer() {
+          const src = this.ctx.createBufferSource();
+          src.buffer = this.noiseBuffer;
+          src.loop = true;
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.value = 520;
+          filter.Q.value = 1.8;
+
+          const lfo = this.ctx.createOscillator();
+          lfo.frequency.value = 0.32;
+          const lfoGain = this.ctx.createGain();
+          lfoGain.gain.value = 0.08;
+
+          const gain = this.ctx.createGain();
+          gain.gain.value = 0.09;
+          lfo.connect(gain.gain);
+          lfo.start();
+
+          src.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.masterGain);
+          src.start();
+        }
+
+        setupNightBreezeLayer() {
+          const src = this.ctx.createBufferSource();
+          src.buffer = this.noiseBuffer;
+          src.loop = true;
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'highpass';
+          filter.frequency.value = 680;
+
+          const lowpass = this.ctx.createBiquadFilter();
+          lowpass.type = 'lowpass';
+          lowpass.frequency.value = 1350;
+
+          const lfo = this.ctx.createOscillator();
+          lfo.frequency.value = 0.08;
+          const lfoGain = this.ctx.createGain();
+          lfoGain.gain.value = 340;
+          lfo.connect(lowpass.frequency);
+          lfo.start();
+
+          const gain = this.ctx.createGain();
+          gain.gain.value = 0.07;
+
+          src.connect(filter);
+          filter.connect(lowpass);
+          lowpass.connect(gain);
+          gain.connect(this.masterGain);
+          src.start();
+        }
+
+        setupCricketsAndFrogsLayer() {
+          // High-frequency rhythmic cricket stridulation on the right riverbank
+          const cricketOsc = this.ctx.createOscillator();
+          cricketOsc.type = 'sine';
+          cricketOsc.frequency.value = 4320;
+
+          const pulseLfo = this.ctx.createOscillator();
+          pulseLfo.type = 'sine';
+          pulseLfo.frequency.value = 14.5;
+
+          const pulseGain = this.ctx.createGain();
+          pulseGain.gain.value = 0.012;
+          pulseLfo.connect(pulseGain.gain);
+
+          const bankPanner = this.createSpatialPanner(22, 1.5, -18);
+          cricketOsc.connect(pulseGain);
+          pulseGain.connect(bankPanner);
+
+          cricketOsc.start();
+          pulseLfo.start();
+        }
+
+        setupLaunchDieselLayer() {
+          // Low marine diesel engine chug (42 Hz triangle modulated at 5.5 Hz)
+          const osc = this.ctx.createOscillator();
+          osc.type = 'sawtooth';
+          osc.frequency.value = 41.0;
+
+          const chugLfo = this.ctx.createOscillator();
+          chugLfo.type = 'sine';
+          chugLfo.frequency.value = 5.2;
+          const chugDepth = this.ctx.createGain();
+          chugDepth.gain.value = 0.035;
+
+          const lp = this.ctx.createBiquadFilter();
+          lp.type = 'lowpass';
+          lp.frequency.value = 115;
+
+          this.launchEngineGain = this.ctx.createGain();
+          this.launchEngineGain.gain.value = 0.001;
+
+          chugLfo.connect(chugDepth);
+          osc.connect(lp);
+          lp.connect(this.launchEngineGain);
+          this.launchEngineGain.connect(this.launchPanner);
+
+          osc.start();
+          chugLfo.start();
+        }
+
+        // Trigger Layer 6: Wooden Hull Creak + Majhi Oar Water Plunge
+        triggerOarAndHullCreak() {
+          if (!this.isInitialized || isSoundMuted) return;
+          const now = this.ctx.currentTime;
+
+          // 1. Timber hull creak (resonant stick-slip groan 245 Hz -> 190 Hz)
+          const osc = this.ctx.createOscillator();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(248, now);
+          osc.frequency.exponentialRampToValueAtTime(188, now + 0.85);
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.value = 260;
+          filter.Q.value = 4.5;
+
+          const creakGain = this.ctx.createGain();
+          creakGain.gain.setValueAtTime(0.001, now);
+          creakGain.gain.linearRampToValueAtTime(0.085, now + 0.18);
+          creakGain.gain.exponentialRampToValueAtTime(0.0008, now + 0.95);
+
+          osc.connect(filter);
+          filter.connect(creakGain);
+          creakGain.connect(this.boatPanner);
+          osc.start(now);
+          osc.stop(now + 1.0);
+
+          // 2. Oar water plunge splash (0.3s after creak begins)
+          const splashSrc = this.ctx.createBufferSource();
+          splashSrc.buffer = this.noiseBuffer;
+
+          const splashFilter = this.ctx.createBiquadFilter();
+          splashFilter.type = 'bandpass';
+          splashFilter.frequency.setValueAtTime(680, now + 0.25);
+          splashFilter.frequency.exponentialRampToValueAtTime(290, now + 1.15);
+          splashFilter.Q.value = 1.6;
+
+          const splashGain = this.ctx.createGain();
+          splashGain.gain.setValueAtTime(0.001, now + 0.25);
+          splashGain.gain.linearRampToValueAtTime(0.22, now + 0.42);
+          splashGain.gain.exponentialRampToValueAtTime(0.001, now + 1.25);
+
+          splashSrc.connect(splashFilter);
+          splashFilter.connect(splashGain);
+          splashGain.connect(this.boatPanner);
+          splashSrc.start(now + 0.25, Math.random() * 3.0, 1.1);
+        }
+
+        // Trigger Layer 7: Subtle Kerosene Lantern Glass/Wire Clink
+        triggerLanternClink() {
+          if (!this.isInitialized || isSoundMuted) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(2780, now);
+          osc.frequency.exponentialRampToValueAtTime(2420, now + 0.09);
+
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.0005, now);
+          gain.gain.linearRampToValueAtTime(0.015, now + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
+
+          osc.connect(gain);
+          gain.connect(this.boatPanner);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        }
+
+        // Trigger Layer 7b: Bamboo Fishing Trap (Khora Jhal) Lift Creak & Net Water Drip
+        triggerBambooTrapLift() {
+          if (!this.isInitialized || isSoundMuted) return;
+          const now = this.ctx.currentTime;
+
+          // Hollow bamboo tension flex
+          const osc = this.ctx.createOscillator();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(480, now);
+          osc.frequency.exponentialRampToValueAtTime(340, now + 0.65);
+
+          const bp = this.ctx.createBiquadFilter();
+          bp.type = 'bandpass';
+          bp.frequency.value = 510;
+          bp.Q.value = 6.0;
+
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.045, now + 0.15);
+          gain.gain.exponentialRampToValueAtTime(0.0005, now + 0.7);
+
+          osc.connect(bp);
+          bp.connect(gain);
+          gain.connect(this.trapPanner);
+          osc.start(now);
+          osc.stop(now + 0.75);
+
+          // Water droplets trickling from lifted mesh net
+          const dripSrc = this.ctx.createBufferSource();
+          dripSrc.buffer = this.noiseBuffer;
+          const dripBp = this.ctx.createBiquadFilter();
+          dripBp.type = 'bandpass';
+          dripBp.frequency.value = 1150;
+          dripBp.Q.value = 3.2;
+
+          const dripGain = this.ctx.createGain();
+          dripGain.gain.setValueAtTime(0.001, now + 0.4);
+          dripGain.gain.linearRampToValueAtTime(0.09, now + 0.8);
+          dripGain.gain.exponentialRampToValueAtTime(0.001, now + 2.1);
+
+          dripSrc.connect(dripBp);
+          dripBp.connect(dripGain);
+          dripGain.connect(this.trapPanner);
+          dripSrc.start(now + 0.4, 1.0, 1.8);
+        }
+
+        // Trigger Layer 5: Nocturnal River Bird Call (Nishibok / Night Heron)
+        triggerNightBirdCall() {
+          if (!this.isInitialized || isSoundMuted) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1060, now);
+          osc.frequency.exponentialRampToValueAtTime(760, now + 0.75);
+
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.038, now + 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.0005, now + 0.85);
+
+          osc.connect(gain);
+          gain.connect(this.reverbNode);
+          osc.start(now);
+          osc.stop(now + 0.9);
+        }
+
+        // Trigger Layer 9: Deep Distant Bangladeshi River-Launch Horn (at 42.5s)
+        triggerDistantLaunchHorn() {
+          if (!this.isInitialized || isSoundMuted) return;
+          const now = this.ctx.currentTime;
+          const freqs = [32.70, 65.41, 98.00, 130.81]; // C1 sub, C2, G2, C3 brassy launch chord
+          const weights = [0.45, 0.55, 0.35, 0.18];
+
+          const lp = this.ctx.createBiquadFilter();
+          lp.type = 'lowpass';
+          lp.frequency.setValueAtTime(295, now);
+          lp.frequency.linearRampToValueAtTime(340, now + 1.5);
+          lp.frequency.exponentialRampToValueAtTime(160, now + 5.2);
+
+          const hornGain = this.ctx.createGain();
+          hornGain.gain.setValueAtTime(0.0001, now);
+          hornGain.gain.linearRampToValueAtTime(0.24, now + 0.65);
+          hornGain.gain.setValueAtTime(0.22, now + 2.3);
+          hornGain.gain.exponentialRampToValueAtTime(0.0005, now + 5.5);
+
+          lp.connect(hornGain);
+          hornGain.connect(this.launchPanner);
+          hornGain.connect(this.reverbNode);
+
+          freqs.forEach((f, idx) => {
+            const osc = this.ctx.createOscillator();
+            osc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle';
+            osc.frequency.setValueAtTime(f * (1 + (idx - 1.5) * 0.002), now);
+            const oscGain = this.ctx.createGain();
+            oscGain.gain.value = weights[idx];
+            osc.connect(oscGain);
+            oscGain.connect(lp);
+            osc.start(now);
+            osc.stop(now + 5.6);
+          });
+        }
+
+        updateSpatialPositions(boatPos, trapPos, launchPos, timelineSec) {
+          if (!this.isInitialized) return;
+          if (this.boatPanner) {
+            this.boatPanner.setPosition(boatPos.x, boatPos.y, boatPos.z);
+          }
+          if (this.trapPanner) {
+            this.trapPanner.setPosition(trapPos.x, trapPos.y, trapPos.z);
+          }
+          if (this.launchPanner) {
+            this.launchPanner.setPosition(launchPos.x, launchPos.y, launchPos.z);
+          }
+          // Modulate distant launch diesel chug audible window (36s - 60s)
+          if (this.launchEngineGain) {
+            let chugLevel = 0.001;
+            if (timelineSec > 36 && timelineSec < 60) {
+              const norm = Math.sin(((timelineSec - 36) / 24) * Math.PI);
+              chugLevel = 0.001 + Math.max(0, norm) * 0.065;
+            }
+            this.launchEngineGain.gain.setTargetAtTime(chugLevel, this.ctx.currentTime, 0.2);
+          }
+        }
+
+        setMuted(muted) {
+          if (!this.isInitialized) return;
+          const now = this.ctx.currentTime;
+          this.masterGain.gain.cancelScheduledValues(now);
+          this.masterGain.gain.setTargetAtTime(muted ? 0.0 : 0.88, now, 0.25);
+        }
+      }
+
+      const soundEngine = new MidnightRiverSoundEngine();
+
+      // =========================================================================
+      // 3. THREE.JS 3D WORLD & CUSTOM GLSL SHADERS
+      // =========================================================================
+      const container = document.getElementById('webgl-container');
+      let renderer, scene, camera;
+
+      try {
+        renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.05;
+        container.appendChild(renderer.domElement);
+      } catch (err) {
+        document.getElementById('webgl-fallback').style.display = 'flex';
+        return;
+      }
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x030A12);
+      scene.fog = new THREE.FogExp2(0x07111F, 0.022);
+
+      camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 260);
+      camera.position.set(0, 1.35, 18);
+
+      // Ambient & Moonlight Illumination
+      const hemiLight = new THREE.HemisphereLight(0x28445B, 0x030A12, 0.65);
+      scene.add(hemiLight);
+
+      const moonDirLight = new THREE.DirectionalLight(0xB4C7D3, 0.85);
+      moonDirLight.position.set(-28, 38, -95);
+      scene.add(moonDirLight);
+
+      // Sky Dome, Pale Moon & Drifting Monsoon Clouds
+      const skyGroup = new THREE.Group();
+      scene.add(skyGroup);
+
+      const moonGeo = new THREE.SphereGeometry(4.2, 32, 32);
+      const moonMat = new THREE.MeshBasicMaterial({ color: 0xdce8f0, fog: false });
+      const moonMesh = new THREE.Mesh(moonGeo, moonMat);
+      moonMesh.position.set(-28, 36, -135);
+      skyGroup.add(moonMesh);
+
+      // Soft Moon Halo Sprite
+      function createRadialGlowTexture(colorHex, stopAlpha) {
+        const c = document.createElement('canvas');
+        c.width = 256; c.height = 256;
+        const ctx = c.getContext('2d');
+        const grad = ctx.createRadialGradient(128, 128, 4, 128, 128, 128);
+        grad.addColorStop(0, colorHex);
+        grad.addColorStop(0.35, stopAlpha);
+        grad.addColorStop(1, 'rgba(7, 17, 31, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 256, 256);
+        return new THREE.CanvasTexture(c);
+      }
+
+      const moonHaloTex = createRadialGlowTexture('rgba(210, 228, 240, 0.65)', 'rgba(180, 199, 211, 0.18)');
+      const moonHalo = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: moonHaloTex,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        fog: false
+      }));
+      moonHalo.scale.set(42, 42, 1);
+      moonHalo.position.copy(moonMesh.position);
+      skyGroup.add(moonHalo);
+
+      // Drifting Monsoon Cloud Planes in front of the Moon
+      const cloudPlanes = [];
+      const cloudTex = createRadialGlowTexture('rgba(12, 26, 44, 0.78)', 'rgba(7, 17, 31, 0.35)');
+      for (let i = 0; i < 14; i++) {
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+          map: cloudTex,
+          transparent: true,
+          opacity: 0.65,
+          depthWrite: false,
+          fog: false
+        }));
+        sp.position.set(-65 + i * 11, 28 + (i % 3) * 5, -125 - (i % 2) * 4);
+        sp.scale.set(42 + (i % 4) * 8, 14 + (i % 3) * 4, 1);
+        skyGroup.add(sp);
+        cloudPlanes.push({ sprite: sp, speed: 0.25 + (i % 3) * 0.12 });
+      }
+
+      // =========================================================================
+      // CUSTOM GLSL RIVER WATER SHADER (Gerstner Waves + Kelvin Wake + Ripples)
+      // =========================================================================
+      const waterUniforms = {
+        uTime: { value: 0 },
+        uBoatPos: { value: new THREE.Vector3(0, 0, -25) },
+        uLanternPos: { value: new THREE.Vector3(0, 1.3, -23) },
+        uLanternIntensity: { value: 1.0 },
+        uOarRipple: { value: new THREE.Vector4(0, 0, -25, -10.0) }, // x, y, z, birthTime
+        uTrapRipple: { value: new THREE.Vector4(16, 0, -26, -10.0) },
+        uMoonDir: { value: new THREE.Vector3(-28, 36, -135).normalize() },
+        uSheetLightning: { value: 0.0 },
+        uFogColor: { value: new THREE.Color(0x07111F) },
+        uFogDensity: { value: 0.021 }
+      };
+
+      const waterVertexShader = `
+        uniform float uTime;
+        uniform vec3 uBoatPos;
+        uniform vec4 uOarRipple;
+        uniform vec4 uTrapRipple;
+
+        varying vec3 vWorldPos;
+        varying vec3 vNormal;
+        varying float vWaveHeight;
+
+        // 2D Simplex-like hash noise for natural river irregularity
+        float hash(vec2 p) {
+          return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+        }
+
+        float noise(vec2 p) {
+          vec2 i = floor(p);
+          vec2 f = fract(p);
+          vec2 u = f * f * (3.0 - 2.0 * f);
+          return mix(
+            mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), u.x),
+            mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x),
+            u.y
+          );
+        }
+
+        float calcRiverHeight(vec2 xz) {
+          float t = uTime;
+          // 4-octave directional river waves
+          float w1 = sin(xz.x * 0.42 + xz.y * 0.28 + t * 1.35) * 0.09;
+          float w2 = cos(xz.x * 0.85 - xz.y * 0.62 + t * 1.95) * 0.045;
+          float w3 = sin(xz.x * 1.9 + xz.y * 1.4 - t * 2.6) * 0.022;
+          float w4 = (noise(xz * 0.65 + vec2(t * 0.45, -t * 0.35)) - 0.5) * 0.06;
+
+          // Dynamic Boat Kelvin Wake ring
+          float dBoat = length(xz - uBoatPos.xz);
+          float boatWake = sin(dBoat * 3.8 - t * 5.2) * exp(-dBoat * 0.16) * 0.065;
+
+          // Majhi Oar-Dip Concentric Ripple
+          float oarAge = max(0.0, t - uOarRipple.w);
+          float dOar = length(xz - uOarRipple.xz);
+          float oarRing = sin(dOar * 6.0 - oarAge * 7.5) * exp(-dOar * 0.32) * exp(-oarAge * 0.85) * 0.055;
+
+          // Bamboo Trap (Khora Jhal) Net Drip Ripple
+          float trapAge = max(0.0, t - uTrapRipple.w);
+          float dTrap = length(xz - uTrapRipple.xz);
+          float trapRing = sin(dTrap * 5.0 - trapAge * 6.5) * exp(-dTrap * 0.25) * exp(-trapAge * 0.65) * 0.045;
+
+          return w1 + w2 + w3 + w4 + boatWake + oarRing + trapRing;
+        }
+
+        void main() {
+          vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+          vec2 xz = worldPosition.xz;
+
+          float eps = 0.18;
+          float h = calcRiverHeight(xz);
+          float hx = calcRiverHeight(xz + vec2(eps, 0.0));
+          float hz = calcRiverHeight(xz + vec2(0.0, eps));
+
+          worldPosition.y += h;
+          vWorldPos = worldPosition.xyz;
+          vWaveHeight = h;
+
+          // Finite-difference normal
+          vNormal = normalize(vec3(h - hx, eps, h - hz));
+          gl_Position = projectionMatrix * viewMatrix * worldPosition;
+        }
+      `;
+
+      const waterFragmentShader = `
+        uniform float uTime;
+        uniform vec3 uLanternPos;
+        uniform float uLanternIntensity;
+        uniform vec3 uMoonDir;
+        uniform float uSheetLightning;
+        uniform vec3 uFogColor;
+        uniform float uFogDensity;
+
+        varying vec3 vWorldPos;
+        varying vec3 vNormal;
+        varying float vWaveHeight;
+
+        float hash(vec2 p) {
+          return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+        }
+
+        float noise(vec2 p) {
+          vec2 i = floor(p);
+          vec2 f = fract(p);
+          vec2 u = f * f * (3.0 - 2.0 * f);
+          return mix(
+            mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), u.x),
+            mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x),
+            u.y
+          );
+        }
+
+        void main() {
+          // Micro normal perturbation for post-rain shimmering water texture
+          vec2 uv = vWorldPos.xz;
+          float m1 = noise(uv * 3.8 + vec2(uTime * 1.1, -uTime * 0.8));
+          float m2 = noise(uv * 8.5 - vec2(uTime * 1.7, uTime * 1.3));
+          vec3 N = normalize(vNormal + vec3((m1 - 0.5) * 0.26, 0.0, (m2 - 0.5) * 0.26));
+
+          vec3 V = normalize(cameraPosition - vWorldPos);
+          vec3 R = reflect(-V, N);
+
+          // Schlick Fresnel Approximation (F0 = 0.02 for water)
+          float cosTheta = max(dot(N, V), 0.0);
+          float fresnel = 0.02 + 0.98 * pow(1.0 - cosTheta, 5.0);
+
+          // Base colors from palette: Deep river black (#030A12) & Midnight blue (#07111F)
+          vec3 deepWater = vec3(0.012, 0.039, 0.071);
+          vec3 skyReflect = vec3(0.045, 0.105, 0.185) + vec3(0.12, 0.16, 0.22) * uSheetLightning;
+          vec3 color = mix(deepWater, skyReflect, fresnel * 0.72);
+
+          // Distorted Moonlight Silver (#B4C7D3) Specular Path
+          vec3 H_moon = normalize(uMoonDir + V);
+          float moonSpec1 = pow(max(dot(N, H_moon), 0.0), 110.0) * 1.35;
+          float moonSpec2 = pow(max(dot(N, H_moon), 0.0), 18.0) * 0.22;
+          vec3 moonColor = vec3(0.706, 0.780, 0.827);
+          color += moonColor * (moonSpec1 + moonSpec2);
+
+          // Warm Kerosene Lantern (#E8A453) Point Light & Shimmering Water Column
+          vec3 toLantern = uLanternPos - vWorldPos;
+          float distL = length(toLantern);
+          vec3 L = normalize(toLantern);
+          vec3 H_lantern = normalize(L + V);
+          float atten = 1.0 / (1.0 + 0.065 * distL + 0.012 * distL * distL);
+          float lanternSpec = pow(max(dot(N, H_lantern), 0.0), 42.0) * 2.8;
+          float lanternDiff = max(dot(N, L), 0.0) * 0.55;
+          vec3 amberColor = vec3(0.910, 0.643, 0.325);
+          color += amberColor * (lanternSpec + lanternDiff) * atten * uLanternIntensity;
+
+          // Subtle Exp2 Atmospheric Fog blending
+          float distCam = length(cameraPosition - vWorldPos);
+          float fogFactor = 1.0 - exp(-pow(distCam * uFogDensity, 2.0));
+          color = mix(color, uFogColor + vec3(0.08, 0.11, 0.15) * uSheetLightning, clamp(fogFactor, 0.0, 1.0));
+
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `;
+
+      const waterGeo = new THREE.PlaneGeometry(240, 240, 180, 180);
+      waterGeo.rotateX(-Math.PI / 2);
+      const waterMat = new THREE.ShaderMaterial({
+        vertexShader: waterVertexShader,
+        fragmentShader: waterFragmentShader,
+        uniforms: waterUniforms
+      });
+      const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+      scene.add(waterMesh);
+
+      // Helper function matching vertex wave math for accurate boat buoyancy
+      function sampleWaveHeight(x, z, t) {
+        const w1 = Math.sin(x * 0.42 + z * 0.28 + t * 1.35) * 0.09;
+        const w2 = Math.cos(x * 0.85 - z * 0.62 + t * 1.95) * 0.045;
+        return w1 + w2;
+      }
+
+      // =========================================================================
+      // 4. TRADITIONAL BANGLADESHI BOAT (DINGI NOUKA), MAJHI & FLICKERING HARIKEN
+      // =========================================================================
+      const boatGroup = new THREE.Group();
+      scene.add(boatGroup);
+
+      // Curved Weathered Timber Hull (Dingi Nouka profile)
+      const hullLength = 6.6;
+      const hullGeo = new THREE.CylinderGeometry(0.68, 0.52, hullLength, 20, 24, false);
+      hullGeo.rotateZ(Math.PI / 2);
+      const posAttr = hullGeo.attributes.position;
+      for (let i = 0; i < posAttr.count; i++) {
+        let vx = posAttr.getX(i);
+        let vy = posAttr.getY(i);
+        let vz = posAttr.getZ(i);
+        const normX = Math.min(1.0, Math.abs(vx) / (hullLength * 0.5));
+        // Pinch bow and stern into graceful upturned Bangladeshi nouka গলুই (golui)
+        const pinch = Math.max(0.03, 1.0 - Math.pow(normX, 1.85));
+        vz *= pinch * 1.25;
+        if (vy > 0) {
+          // Hollow out interior deck slightly
+          vy *= 0.22;
+        }
+        // Upturned prow/stern curve
+        vy += Math.pow(normX, 2.6) * 0.58;
+        posAttr.setXYZ(i, vx, vy, vz);
+      }
+      hullGeo.computeVertexNormals();
+
+      const darkTimberMat = new THREE.MeshStandardMaterial({
+        color: 0x1a120b,
+        roughness: 0.42,
+        metalness: 0.08
+      });
+      const hullMesh = new THREE.Mesh(hullGeo, darkTimberMat);
+      hullMesh.position.y = 0.08;
+      boatGroup.add(hullMesh);
+
+      // Woven Arched Bamboo Canopy (Chhai / ছই)
+      const chhaiGeo = new THREE.CylinderGeometry(0.76, 0.76, 2.35, 16, 8, true, 0, Math.PI);
+      chhaiGeo.rotateZ(Math.PI / 2);
+      chhaiGeo.rotateX(Math.PI / 2);
+      const chhaiMat = new THREE.MeshStandardMaterial({
+        color: 0x261b11,
+        roughness: 0.78,
+        side: THREE.DoubleSide
+      });
+      const chhaiMesh = new THREE.Mesh(chhaiGeo, chhaiMat);
+      chhaiMesh.position.set(-0.25, 0.22, 0);
+      boatGroup.add(chhaiMesh);
+
+      // Bamboo ribs on Chhai
+      for (let r = -1.0; r <= 1.0; r += 0.5) {
+        const ribGeo = new THREE.TorusGeometry(0.77, 0.022, 8, 20, Math.PI);
+        ribGeo.rotateY(Math.PI / 2);
+        const rib = new THREE.Mesh(ribGeo, darkTimberMat);
+        rib.position.set(-0.25 + r, 0.22, 0);
+        boatGroup.add(rib);
+      }
+
+      // Silhouetted Majhi (Boatman) at the stern + Articulated Wooden Boitha (Oar)
+      const majhiGroup = new THREE.Group();
+      majhiGroup.position.set(-2.05, 0.32, 0);
+      boatGroup.add(majhiGroup);
+
+      const shawlMat = new THREE.MeshStandardMaterial({ color: 0x090d14, roughness: 0.9 });
+      const torsoMesh = new THREE.Mesh(new THREE.ConeGeometry(0.34, 0.78, 12), shawlMat);
+      torsoMesh.position.y = 0.35;
+      majhiGroup.add(torsoMesh);
+
+      const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 12), shawlMat);
+      headMesh.position.set(0.04, 0.82, 0);
+      majhiGroup.add(headMesh);
+
+      // Articulated Oar (Boitha)
+      const oarPivot = new THREE.Group();
+      oarPivot.position.set(0.15, 0.48, 0.28);
+      majhiGroup.add(oarPivot);
+
+      const oarShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, 2.7, 8), darkTimberMat);
+      oarShaft.rotation.x = Math.PI / 3.1;
+      oarShaft.position.set(0, -0.45, 0.85);
+      oarPivot.add(oarShaft);
+
+      const oarBlade = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.55, 0.02), darkTimberMat);
+      oarBlade.rotation.x = Math.PI / 3.1;
+      oarBlade.position.set(0, -0.95, 1.65);
+      oarPivot.add(oarBlade);
+
+      // Bow Crooked Wooden Post & Swinging Kerosene Hariken Lantern
+      const lanternPost = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.032, 1.15, 8), darkTimberMat);
+      lanternPost.position.set(2.35, 0.68, 0);
+      lanternPost.rotation.z = -0.28;
+      boatGroup.add(lanternPost);
+
+      const lanternSwingGroup = new THREE.Group();
+      lanternSwingGroup.position.set(2.52, 1.18, 0);
+      boatGroup.add(lanternSwingGroup);
+
+      const harikenGlass = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.085, 0.095, 0.22, 12),
+        new THREE.MeshBasicMaterial({ color: 0xE8A453 })
+      );
+      harikenGlass.position.y = -0.16;
+      lanternSwingGroup.add(harikenGlass);
+
+      const harikenCap = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.12, 0.04, 12), darkTimberMat);
+      harikenCap.position.y = -0.04;
+      lanternSwingGroup.add(harikenCap);
+
+      const harikenBase = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.12, 0.06, 12), darkTimberMat);
+      harikenBase.position.y = -0.28;
+      lanternSwingGroup.add(harikenBase);
+
+      // Warm Amber PointLight & Halo Sprite attached to Hariken
+      const lanternLight = new THREE.PointLight(0xE8A453, 2.6, 28, 1.8);
+      lanternLight.position.set(0, -0.16, 0);
+      lanternSwingGroup.add(lanternLight);
+
+      const amberGlowTex = createRadialGlowTexture('rgba(232, 164, 83, 0.92)', 'rgba(232, 164, 83, 0.24)');
+      const lanternGlowSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: amberGlowTex,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      }));
+      lanternGlowSprite.scale.set(2.6, 2.6, 1);
+      lanternGlowSprite.position.set(0, -0.16, 0);
+      lanternSwingGroup.add(lanternGlowSprite);
+
+      // Boat 75-second Catmull-Rom Spline Path across the Padma/Meghna
+      const boatSpline = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-34, 0, -58), // 00s: Deep in the mist
+        new THREE.Vector3(-18, 0, -38), // 15s: Approaching past the bamboo net
+        new THREE.Vector3(-4,  0, -18), // 30s: Passing foreground-midground
+        new THREE.Vector3(7,   0, -14), // 40s: Closest passage to viewer
+        new THREE.Vector3(18,  0, -26), // 55s: Drifting downstream
+        new THREE.Vector3(32,  0, -54)  // 75s: Receding into the midnight fog
+      ]);
+
+      // =========================================================================
+      // 5. RURAL BANGLADESHI RIVERBANK, ANIMATED KHORA JHAL NET, GHAT & FLORA
+      // =========================================================================
+      const riverbankGroup = new THREE.Group();
+      scene.add(riverbankGroup);
+
+      const mudMat = new THREE.MeshStandardMaterial({ color: 0x050D14, roughness: 0.88 });
+      const foliageMat = new THREE.MeshStandardMaterial({ color: 0x061018, roughness: 0.75 });
+
+      // Starboard Muddy Shoreline Embankment
+      const shoreGeo = new THREE.BoxGeometry(38, 2.6, 150);
+      const shoreMesh = new THREE.Mesh(shoreGeo, mudMat);
+      shoreMesh.position.set(34, -0.6, -42);
+      shoreMesh.rotation.y = -0.12;
+      riverbankGroup.add(shoreMesh);
+
+      // Wooden Village Ghat (Stepped Jetty & Moored Second Nouka)
+      const ghatGroup = new THREE.Group();
+      ghatGroup.position.set(15.5, 0.0, -20);
+      riverbankGroup.add(ghatGroup);
+
+      const deckPlank = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.14, 2.2), darkTimberMat);
+      deckPlank.position.set(1.2, 0.65, 0);
+      ghatGroup.add(deckPlank);
+
+      for (let px = -1.2; px <= 3.2; px += 1.4) {
+        for (let pz = -0.85; pz <= 0.85; pz += 1.7) {
+          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 2.2, 8), darkTimberMat);
+          post.position.set(px, 0.1, pz);
+          ghatGroup.add(post);
+        }
+      }
+
+      // Moored empty boat bobbing gently at the village ghat
+      const mooredBoat = hullMesh.clone();
+      mooredBoat.scale.set(0.72, 0.72, 0.72);
+      mooredBoat.position.set(13.2, 0.06, -18.2);
+      mooredBoat.rotation.y = 0.35;
+      scene.add(mooredBoat);
+
+      // Animated Cantilevered Bamboo Fishing Trap (Cheena Jhal / Khora Jhal)
+      const trapFulcrumGroup = new THREE.Group();
+      trapFulcrumGroup.position.set(16.0, 0.9, -28.0);
+      scene.add(trapFulcrumGroup);
+
+      // Fixed shore support posts
+      const postL = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 3.6, 8), darkTimberMat);
+      postL.position.set(16.8, 0.8, -26.8);
+      scene.add(postL);
+      const postR = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 3.6, 8), darkTimberMat);
+      postR.position.set(16.8, 0.8, -29.2);
+      scene.add(postR);
+
+      // Pivoting X-frame bamboo arms
+      const pole1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 9.5, 8), darkTimberMat);
+      pole1.rotation.z = Math.PI / 2.3;
+      pole1.position.set(-3.2, 1.4, -0.9);
+      trapFulcrumGroup.add(pole1);
+
+      const pole2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 9.5, 8), darkTimberMat);
+      pole2.rotation.z = Math.PI / 2.3;
+      pole2.position.set(-3.2, 1.4, 0.9);
+      trapFulcrumGroup.add(pole2);
+
+      const crossBar = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 3.4, 8), darkTimberMat);
+      crossBar.rotation.x = Math.PI / 2;
+      crossBar.position.set(-6.8, 2.8, 0);
+      trapFulcrumGroup.add(crossBar);
+
+      // Suspended parabolic mesh fishing net
+      const netGeo = new THREE.ConeGeometry(2.4, 2.1, 4, 1, true);
+      netGeo.rotateY(Math.PI / 4);
+      const netMat = new THREE.MeshBasicMaterial({
+        color: 0x28445B,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.38
+      });
+      const netMesh = new THREE.Mesh(netGeo, netMat);
+      netMesh.position.set(-6.2, 1.4, 0);
+      netMesh.rotation.x = Math.PI;
+      trapFulcrumGroup.add(netMesh);
+
+      // Tin-Roofed Village Huts (Chala Ghar) with Warm Kerosene Window Glows
+      const villageWindows = [];
+      const hutPositions = [
+        { x: 24, y: 1.4, z: -26, rot: -0.25 },
+        { x: 27, y: 1.7, z: -38, rot: -0.15 },
+        { x: 25, y: 1.5, z: -52, rot: -0.32 }
+      ];
+      hutPositions.forEach((hp) => {
+        const hut = new THREE.Group();
+        hut.position.set(hp.x, hp.y, hp.z);
+        hut.rotation.y = hp.rot;
+
+        const body = new THREE.Mesh(new THREE.BoxGeometry(3.6, 2.1, 2.8), mudMat);
+        hut.add(body);
+
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(2.8, 1.3, 4), new THREE.MeshStandardMaterial({
+          color: 0x121e2b,
+          roughness: 0.35,
+          metalness: 0.55
+        }));
+        roof.rotation.y = Math.PI / 4;
+        roof.position.y = 1.65;
+        hut.add(roof);
+
+        // Warm amber shuttered window glow
+        const winMat = new THREE.MeshBasicMaterial({ color: 0xE8A453, transparent: true, opacity: 0.75 });
+        const winMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.52), winMat);
+        winMesh.position.set(-1.81, 0.1, 0.3);
+        winMesh.rotation.y = -Math.PI / 2;
+        hut.add(winMesh);
+        villageWindows.push(winMat);
+
+        riverbankGroup.add(hut);
+      });
+
+      // Bamboo Groves (Baashjhar) & Swaying Trees along the Bank
+      const bambooCulms = [];
+      for (let i = 0; i < 42; i++) {
+        const h = 5.5 + (i % 5) * 1.4;
+        const culm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, h, 6), foliageMat);
+        const bx = 18.5 + (i % 7) * 1.8;
+        const bz = -10 - i * 1.65;
+        culm.position.set(bx, h * 0.45, bz);
+        culm.rotation.z = 0.08 + (i % 4) * 0.05;
+        riverbankGroup.add(culm);
+        bambooCulms.push({ mesh: culm, baseRotZ: culm.rotation.z, phase: i * 0.7 });
+      }
+
+      // Drifting Water Hyacinth Clusters (Kochuripana) on the River Surface
+      const hyacinthClusters = [];
+      for (let c = 0; c < 12; c++) {
+        const cluster = new THREE.Group();
+        const padCount = 5 + (c % 4);
+        for (let p = 0; p < padCount; p++) {
+          const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.18, 0.04, 7), foliageMat);
+          pad.position.set((Math.random() - 0.5) * 0.9, 0.02, (Math.random() - 0.5) * 0.9);
+          cluster.add(pad);
+        }
+        cluster.position.set(-8 + (c % 5) * 5.2, 0.0, 12 - c * 5.5);
+        scene.add(cluster);
+        hyacinthClusters.push({ group: cluster, baseZ: cluster.position.z, speed: 0.22 + (c % 3) * 0.06 });
+      }
+
+      // =========================================================================
+      // 6. DISTANT BANGLADESHI DOUBLE-DECKER RIVER LAUNCH & VOLUMETRIC SEARCHLIGHT
+      // =========================================================================
+      const launchGroup = new THREE.Group();
+      launchGroup.position.set(-48, 0.0, -96);
+      scene.add(launchGroup);
+
+      const launchHull = new THREE.Mesh(new THREE.BoxGeometry(16, 1.8, 3.6), mudMat);
+      launchHull.position.y = 0.9;
+      launchGroup.add(launchHull);
+
+      const deck1 = new THREE.Mesh(new THREE.BoxGeometry(13.5, 1.4, 3.2), mudMat);
+      deck1.position.y = 2.4;
+      launchGroup.add(deck1);
+
+      const deck2 = new THREE.Mesh(new THREE.BoxGeometry(10.5, 1.2, 2.8), mudMat);
+      deck2.position.y = 3.6;
+      launchGroup.add(deck2);
+
+      // Warm Illuminated Cabin Tier Window Rows
+      const launchWindowMats = [];
+      for (let row = 0; row < 2; row++) {
+        for (let w = -4.8; w <= 4.8; w += 1.2) {
+          const wMat = new THREE.MeshBasicMaterial({ color: 0xE8A453, transparent: true, opacity: 0.65 });
+          const wPane = new THREE.Mesh(new THREE.PlaneGeometry(0.65, 0.38), wMat);
+          wPane.position.set(w, 2.35 + row * 1.2, 1.62 - row * 0.2);
+          launchGroup.add(wPane);
+          launchWindowMats.push(wMat);
+        }
+      }
+
+      // Sweeping Volumetric Searchlight Cone from Launch Bridge
+      const beamGeo = new THREE.ConeGeometry(5.5, 36, 20, 1, true);
+      beamGeo.translate(0, -18, 0);
+      beamGeo.rotateZ(-Math.PI / 2);
+      const beamMat = new THREE.MeshBasicMaterial({
+        color: 0xdce8f0,
+        transparent: true,
+        opacity: 0.065,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const searchlightCone = new THREE.Mesh(beamGeo, beamMat);
+      searchlightCone.position.set(6.5, 4.1, 0);
+      launchGroup.add(searchlightCone);
+
+      // =========================================================================
+      // 7. BIOLUMINESCENT FIREFLIES (JONAKI POKA) & VOLUMETRIC MIST BILLBOARDS
+      // =========================================================================
+      const fireflyCount = 65;
+      const ffPositions = new Float32Array(fireflyCount * 3);
+      const ffPhases = new Float32Array(fireflyCount);
+      for (let i = 0; i < fireflyCount; i++) {
+        ffPositions[i * 3] = 6 + Math.random() * 18;
+        ffPositions[i * 3 + 1] = 0.4 + Math.random() * 3.2;
+        ffPositions[i * 3 + 2] = 10 - Math.random() * 65;
+        ffPhases[i] = Math.random() * Math.PI * 2;
+      }
+      const ffGeo = new THREE.BufferGeometry();
+      ffGeo.setAttribute('position', new THREE.BufferAttribute(ffPositions, 3));
+      const ffMat = new THREE.PointsMaterial({
+        color: 0xd8ea6a,
+        size: 0.34,
+        map: amberGlowTex,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const fireflyPoints = new THREE.Points(ffGeo, ffMat);
+      scene.add(fireflyPoints);
+
+      // Rolling Low River Mist Billboards
+      const mistSprites = [];
+      const mistTex = createRadialGlowTexture('rgba(40, 68, 91, 0.16)', 'rgba(7, 17, 31, 0.05)');
+      for (let m = 0; m < 22; m++) {
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+          map: mistTex,
+          transparent: true,
+          opacity: 0.36,
+          depthWrite: false
+        }));
+        sp.position.set(-25 + (m % 6) * 10, 0.85 + (m % 3) * 0.4, 8 - m * 3.4);
+        sp.scale.set(22, 5.5, 1);
+        scene.add(sp);
+        mistSprites.push({ sprite: sp, baseX: sp.position.x, speed: 0.35 + (m % 4) * 0.08, phase: m });
+      }
+
+      // =========================================================================
+      // 8. 75-SECOND CINEMATIC CAMERA SPLINE CHOREOGRAPHY
+      // =========================================================================
+      const camPosSpline = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0.0,  1.15, 16.0), // 00s: Low water reveal
+        new THREE.Vector3(1.2,  1.35,  6.0), // 15s: Gliding toward distant lantern & ghat
+        new THREE.Vector3(2.4,  1.50, -3.5), // 30s: Watching the passing dingi nouka & majhi
+        new THREE.Vector3(1.5,  1.65, -8.5), // 45s: Panning toward distant launch horn & village lights
+        new THREE.Vector3(0.4,  1.35,  4.0), // 62s: Settling back over moonlit river for end credits
+        new THREE.Vector3(0.0,  1.15, 16.0)  // 75s: Exact seamless loop return
+      ]);
+
+      const camLookSpline = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-8.0,  1.2, -32.0),
+        new THREE.Vector3(-10.0, 1.1, -30.0),
+        new THREE.Vector3(1.0,   0.9, -16.5),
+        new THREE.Vector3(10.0,  1.4, -34.0),
+        new THREE.Vector3(16.0,  1.1, -42.0),
+        new THREE.Vector3(-8.0,  1.2, -32.0)
+      ]);
+
+      // =========================================================================
+      // 9. UI CONTROLS, TIMELINE SCRUBBER & KEYBOARD ACCESSIBILITY
+      // =========================================================================
+      const openingOverlay = document.getElementById('opening-overlay');
+      const enterBtn = document.getElementById('enter-river-btn');
+      const hudLayer = document.getElementById('hud-layer');
+      const endCreditOverlay = document.getElementById('end-credit-overlay');
+      const fadeCurtain = document.getElementById('fade-curtain');
+      const exploreHint = document.getElementById('explore-hint');
+
+      const btnCinematic = document.getElementById('btn-cinematic');
+      const btnExplore = document.getElementById('btn-explore');
+      const btnSound = document.getElementById('btn-sound');
+      const soundLabel = document.getElementById('sound-label');
+      const btnReplay = document.getElementById('btn-replay');
+      const btnFullscreen = document.getElementById('btn-fullscreen');
+      const btnCredits = document.getElementById('btn-credits');
+      const btnHideUi = document.getElementById('btn-hide-ui');
+      const hideUiLabel = document.getElementById('hide-ui-label');
+
+      const timelineSlider = document.getElementById('timeline-slider');
+      const timecodeDisplay = document.getElementById('timecode-display');
+      const chapterDisplay = document.getElementById('chapter-display');
+
+      const creditsModal = document.getElementById('credits-modal');
+      const closeCreditsBtn = document.getElementById('close-credits-btn');
+
+      function enterExperience() {
+        if (hasEntered) return;
+        hasEntered = true;
+        soundEngine.init();
+        timelineSec = 0.0;
+        openingOverlay.classList.add('hidden');
+        hudLayer.classList.add('active');
+      }
+
+      enterBtn.addEventListener('click', enterExperience);
+
+      function setCameraMode(explore) {
+        isExploreMode = explore;
+        btnCinematic.classList.toggle('active-mode', !explore);
+        btnExplore.classList.toggle('active-mode', explore);
+        exploreHint.classList.toggle('visible', explore);
+      }
+
+      btnCinematic.addEventListener('click', () => setCameraMode(false));
+      btnExplore.addEventListener('click', () => setCameraMode(true));
+
+      function toggleSound() {
+        if (!soundEngine.isInitialized) soundEngine.init();
+        isSoundMuted = !isSoundMuted;
+        soundEngine.setMuted(isSoundMuted);
+        soundLabel.textContent = isSoundMuted ? 'Sound: Off' : 'Sound: On';
+        btnSound.classList.toggle('active-mode', !isSoundMuted);
+      }
+
+      btnSound.addEventListener('click', toggleSound);
+
+      btnReplay.addEventListener('click', () => {
+        fadeCurtain.style.opacity = '1';
+        setTimeout(() => {
+          timelineSec = 0.0;
+          lastOarCycleIndex = -1;
+          lastTrapCycleIndex = -1;
+          lastHornTriggerCycle = -1;
+          lastBird1Cycle = -1;
+          lastBird2Cycle = -1;
+          fadeCurtain.style.opacity = '0';
+        }, 650);
+      });
+
+      btnFullscreen.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      function toggleUiVisibility() {
+        isUiHidden = !isUiHidden;
+        hudLayer.classList.toggle('ui-hidden', isUiHidden);
+        hideUiLabel.textContent = isUiHidden ? 'Show UI' : 'Hide UI';
+      }
+
+      btnHideUi.addEventListener('click', toggleUiVisibility);
+
+      btnCredits.addEventListener('click', () => {
+        creditsModal.classList.add('open');
+        closeCreditsBtn.focus();
+      });
+
+      closeCreditsBtn.addEventListener('click', () => {
+        creditsModal.classList.remove('open');
+      });
+
+      creditsModal.addEventListener('click', (e) => {
+        if (e.target === creditsModal) creditsModal.classList.remove('open');
+      });
+
+      // Timeline Scrubber Events
+      timelineSlider.addEventListener('input', (e) => {
+        isScrubbing = true;
+        timelineSec = parseFloat(e.target.value);
+      });
+      timelineSlider.addEventListener('change', () => {
+        isScrubbing = false;
+      });
+
+      // Pointer & Touch Parallax / Explore Orbit
+      window.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('button, a, input, #credits-modal')) return;
+        isDragging = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        pointerX = (e.clientX / window.innerWidth) * 2 - 1;
+        pointerY = (e.clientY / window.innerHeight) * 2 - 1;
+        if (isDragging && isExploreMode) {
+          const dx = (e.clientX - dragStartX) * 0.0035;
+          const dy = (e.clientY - dragStartY) * 0.0025;
+          targetExploreYaw = Math.max(-0.95, Math.min(0.95, targetExploreYaw - dx));
+          targetExplorePitch = Math.max(-0.12, Math.min(0.38, targetExplorePitch + dy));
+          dragStartX = e.clientX;
+          dragStartY = e.clientY;
+        }
+      });
+
+      window.addEventListener('pointerup', () => {
+        isDragging = false;
+      });
+
+      // Keyboard Shortcuts
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && creditsModal.classList.contains('open')) {
+          creditsModal.classList.remove('open');
+          return;
+        }
+        if (!hasEntered && (e.key === 'Enter' || e.key === ' ')) {
+          enterExperience();
+          return;
+        }
+        const k = e.key.toLowerCase();
+        if (k === 'm') toggleSound();
+        else if (k === 'h') toggleUiVisibility();
+        else if (k === 'e') setCameraMode(true);
+        else if (k === 'c') setCameraMode(false);
+        else if (k === 'f') btnFullscreen.click();
+      });
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      // =========================================================================
+      // 10. MAIN 60 FPS CINEMATIC RENDER & SYNCHRONIZATION LOOP
+      // =========================================================================
+      function formatTime(sec) {
+        const s = Math.floor(sec);
+        const mm = String(Math.floor(s / 60)).padStart(2, '0');
+        const ss = String(s % 60).padStart(2, '0');
+        return `${mm}:${ss}`;
+      }
+
+      function getChapterTitle(sec) {
+        if (sec < 8) return 'I. THE REVEAL — POST-RAIN STILLNESS';
+        if (sec < 23) return 'II. DISTANT LIGHT — THE GHAT & BAMBOO NETS';
+        if (sec < 42) return 'III. THE PASSING BOAT — THE MAJHI’S PASSAGE';
+        if (sec < 57) return 'IV. THE DISTANT HORN — THE MIDNIGHT LAUNCH';
+        return 'V. INTO THE DARKNESS — RECEDING LANTERN';
+      }
+
+      function animate(now) {
+        requestAnimationFrame(animate);
+
+        const dt = Math.min(0.1, (now - lastFrameTime) / 1000);
+        lastFrameTime = now;
+
+        const elapsed = now * 0.001;
+        waterUniforms.uTime.value = elapsed;
+
+        if (hasEntered && !isScrubbing) {
+          timelineSec += dt;
+          if (timelineSec >= LOOP_DURATION) {
+            timelineSec -= LOOP_DURATION;
+            lastOarCycleIndex = -1;
+            lastTrapCycleIndex = -1;
+            lastHornTriggerCycle = -1;
+            lastBird1Cycle = -1;
+            lastBird2Cycle = -1;
+          }
+          timelineSlider.value = timelineSec.toFixed(1);
+        }
+
+        // Update HUD timecode & chapter
+        timecodeDisplay.textContent = `${formatTime(timelineSec)} / 01:15`;
+        chapterDisplay.textContent = getChapterTitle(timelineSec);
+
+        // End Credits visibility (60s - 71s)
+        const showEndCredits = hasEntered && timelineSec >= 60.0 && timelineSec <= 71.0;
+        endCreditOverlay.classList.toggle('visible', showEndCredits);
+
+        // Seamless loop fog thickening at start (0-4s) and end (71-75s)
+        let fogD = 0.021;
+        if (timelineSec < 4.0) {
+          fogD = 0.021 + (1.0 - timelineSec / 4.0) * 0.015;
+        } else if (timelineSec > 71.0) {
+          fogD = 0.021 + ((timelineSec - 71.0) / 4.0) * 0.015;
+        }
+        scene.fog.density = fogD;
+        waterUniforms.uFogDensity.value = fogD;
+
+        // Occasional subtle post-monsoon sheet lightning around 49.5s
+        let lightning = 0.0;
+        if (timelineSec > 49.1 && timelineSec < 49.8) {
+          lightning = Math.exp(-Math.pow((timelineSec - 49.42) / 0.14, 2)) * 0.75;
+        }
+        waterUniforms.uSheetLightning.value = lightning;
+
+        // -----------------------------------------------------------------------
+        // A. ANIMATE DINGI NOUKA, MAJHI ROWING & HARIKEN FLICKER
+        // -----------------------------------------------------------------------
+        const uBoat = hasEntered ? (timelineSec / LOOP_DURATION) : 0.22;
+        const boatPos = boatSpline.getPointAt(uBoat);
+        const boatTangent = boatSpline.getTangentAt(uBoat);
+
+        const waveH = sampleWaveHeight(boatPos.x, boatPos.z, elapsed);
+        boatGroup.position.set(boatPos.x, waveH, boatPos.z);
+
+        const heading = Math.atan2(boatTangent.x, boatTangent.z) - Math.PI / 2;
+        const motionScale = prefersReducedMotion ? 0.3 : 1.0;
+        const boatPitch = Math.sin(elapsed * 1.45) * 0.036 * motionScale;
+        const boatRoll = Math.cos(elapsed * 1.15) * 0.055 * motionScale;
+
+        boatGroup.rotation.set(boatPitch, heading, boatRoll);
+
+        // Majhi 8-second rowing cycle with Boitha oar dip + ripple + timber creak SFX
+        const oarCyclePos = (timelineSec % 8.0) / 8.0;
+        const currentOarIndex = Math.floor(timelineSec / 8.0);
+        const oarSweep = Math.sin(oarCyclePos * Math.PI * 2);
+        const oarDip = Math.cos(oarCyclePos * Math.PI * 2);
+        oarPivot.rotation.y = oarSweep * 0.48;
+        oarPivot.rotation.z = oarDip * 0.24;
+        majhiGroup.rotation.z = oarSweep * 0.08;
+
+        if (hasEntered && currentOarIndex !== lastOarCycleIndex && oarCyclePos > 0.22 && timelineSec > 10 && timelineSec < 56) {
+          lastOarCycleIndex = currentOarIndex;
+          waterUniforms.uOarRipple.value.set(boatPos.x - 1.2, 0, boatPos.z + 1.1, elapsed);
+          soundEngine.triggerOarAndHullCreak();
+        }
+
+        // Swinging Hariken lantern & dual-frequency Perlin-like flame flicker
+        lanternSwingGroup.rotation.z = -boatRoll * 1.6 + Math.sin(elapsed * 2.7) * 0.07;
+        lanternSwingGroup.rotation.x = Math.cos(elapsed * 2.1) * 0.05;
+
+        if (hasEntered && Math.abs(boatRoll) > 0.051 && elapsed - lastClinkTime > 4.5 && timelineSec > 18 && timelineSec < 48) {
+          lastClinkTime = elapsed;
+          soundEngine.triggerLanternClink();
+        }
+
+        const flicker = 0.92 + 0.14 * Math.sin(elapsed * 26.4) * Math.cos(elapsed * 11.7) + 0.06 * Math.sin(elapsed * 43.0);
+        lanternLight.intensity = 2.5 * flicker;
+        waterUniforms.uLanternIntensity.value = flicker;
+
+        const worldLanternPos = new THREE.Vector3();
+        harikenGlass.getWorldPosition(worldLanternPos);
+        waterUniforms.uBoatPos.value.copy(boatGroup.position);
+        waterUniforms.uLanternPos.value.copy(worldLanternPos);
+
+        // -----------------------------------------------------------------------
+        // B. ANIMATE BAMBOO FISHING TRAP (KHORA JHAL) 18s LIFT-AND-DRIP CYCLE
+        // -----------------------------------------------------------------------
+        const trapCyclePos = (timelineSec % 18.0) / 18.0;
+        const currentTrapIndex = Math.floor(timelineSec / 18.0);
+        // Smoothly pivot the cantilevered bamboo frame up out of the water and back down
+        const liftAngle = (0.5 - 0.5 * Math.cos(trapCyclePos * Math.PI * 2)) * 0.34;
+        trapFulcrumGroup.rotation.z = -liftAngle;
+
+        if (hasEntered && currentTrapIndex !== lastTrapCycleIndex && trapCyclePos > 0.35) {
+          lastTrapCycleIndex = currentTrapIndex;
+          waterUniforms.uTrapRipple.value.set(10.0, 0, -28.0, elapsed);
+          soundEngine.triggerBambooTrapLift();
+        }
+
+        // Moored boat gentle bobbing at the ghat
+        mooredBoat.position.y = 0.06 + Math.sin(elapsed * 1.6 + 1.2) * 0.04;
+        mooredBoat.rotation.z = Math.cos(elapsed * 1.2) * 0.04;
+
+        // -----------------------------------------------------------------------
+        // C. ANIMATE DISTANT RIVER LAUNCH, HORN & NIGHT HERON CALLS
+        // -----------------------------------------------------------------------
+        // Launch glides across the misty horizon channel
+        const launchProgress = (timelineSec - 38.0) / 28.0;
+        launchGroup.position.x = -38 + launchProgress * 46;
+        searchlightCone.rotation.y = Math.sin(elapsed * 0.55) * 0.38;
+        beamMat.opacity = (timelineSec > 34 && timelineSec < 64) ? (0.055 + 0.02 * Math.sin(elapsed * 2.1)) : 0.015;
+
+        // Trigger Deep Distant River-Launch Horn at 42.5s
+        const hornCycle = Math.floor(timelineSec / LOOP_DURATION);
+        if (hasEntered && timelineSec >= 42.5 && timelineSec < 43.5 && lastHornTriggerCycle !== hornCycle) {
+          lastHornTriggerCycle = hornCycle;
+          soundEngine.triggerDistantLaunchHorn();
+        }
+
+        // Trigger Nocturnal River Bird calls at 28.5s and 48.0s
+        if (hasEntered && timelineSec >= 28.5 && timelineSec < 29.5 && lastBird1Cycle !== hornCycle) {
+          lastBird1Cycle = hornCycle;
+          soundEngine.triggerNightBirdCall();
+        }
+        if (hasEntered && timelineSec >= 48.0 && timelineSec < 49.0 && lastBird2Cycle !== hornCycle) {
+          lastBird2Cycle = hornCycle;
+          soundEngine.triggerNightBirdCall();
+        }
+
+        // Update 3D Spatial Audio Panner Coordinates
+        soundEngine.updateSpatialPositions(boatGroup.position, trapFulcrumGroup.position, launchGroup.position, timelineSec);
+
+        // -----------------------------------------------------------------------
+        // D. ANIMATE FLORA, WATER HYACINTHS, FIREFLIES & CLOUDS
+        // -----------------------------------------------------------------------
+        bambooCulms.forEach((b) => {
+          b.mesh.rotation.z = b.baseRotZ + Math.sin(elapsed * 0.9 + b.phase) * 0.025 * motionScale;
+        });
+
+        hyacinthClusters.forEach((hc) => {
+          hc.group.position.z += dt * hc.speed;
+          if (hc.group.position.z > 18) hc.group.position.z = -52;
+          hc.group.position.y = sampleWaveHeight(hc.group.position.x, hc.group.position.z, elapsed);
+        });
+
+        const ffPosAttr = ffGeo.attributes.position;
+        for (let i = 0; i < fireflyCount; i++) {
+          const ph = ffPhases[i];
+          const fx = ffPosAttr.getX(i) + Math.sin(elapsed * 0.8 + ph) * 0.008;
+          const fy = ffPosAttr.getY(i) + Math.cos(elapsed * 1.1 + ph) * 0.006;
+          ffPosAttr.setXY(i, fx, fy);
+        }
+        ffPosAttr.needsUpdate = true;
+        ffMat.opacity = 0.55 + 0.35 * Math.sin(elapsed * 3.2);
+
+        mistSprites.forEach((m) => {
+          m.sprite.position.x = m.baseX + Math.sin(elapsed * 0.18 + m.phase) * 4.5;
+        });
+
+        cloudPlanes.forEach((cp) => {
+          cp.sprite.position.x += dt * cp.speed;
+          if (cp.sprite.position.x > 85) cp.sprite.position.x = -85;
+        });
+
+        // -----------------------------------------------------------------------
+        // E. CAMERA CHOREOGRAPHY (CINEMATIC SPLINE vs EXPLORE MODE)
+        // -----------------------------------------------------------------------
+        smoothPointerX += (pointerX - smoothPointerX) * 0.04;
+        smoothPointerY += (pointerY - smoothPointerY) * 0.04;
+
+        const uCam = hasEntered ? (timelineSec / LOOP_DURATION) : 0.0;
+        const baseCamPos = camPosSpline.getPointAt(uCam);
+        const baseLookTarget = camLookSpline.getPointAt(uCam);
+
+        // Subtle boat-like camera bobbing on the water
+        const camBobY = Math.sin(elapsed * 1.25) * 0.045 * motionScale;
+
+        if (!isExploreMode) {
+          camera.position.set(
+            baseCamPos.x + smoothPointerX * 0.65,
+            baseCamPos.y + camBobY - smoothPointerY * 0.28,
+            baseCamPos.z
+          );
+          camera.lookAt(
+            baseLookTarget.x + smoothPointerX * 1.8,
+            baseLookTarget.y - smoothPointerY * 0.9,
+            baseLookTarget.z
+          );
+        } else {
+          exploreYaw += (targetExploreYaw - exploreYaw) * 0.07;
+          explorePitch += (targetExplorePitch - explorePitch) * 0.07;
+          camera.position.set(baseCamPos.x, baseCamPos.y + 0.35 + camBobY, baseCamPos.z);
+          const lookDist = 25.0;
+          const lx = camera.position.x + Math.sin(exploreYaw) * lookDist;
+          const ly = camera.position.y + Math.sin(explorePitch) * 8.0;
+          const lz = camera.position.z - Math.cos(exploreYaw) * lookDist;
+          camera.lookAt(lx, ly, lz);
+        }
+
+        renderer.render(scene, camera);
+      }
+
+      requestAnimationFrame(animate);
+    })();
+  </script>
+</body>
+</html>
