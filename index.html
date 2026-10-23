@@ -466,6 +466,121 @@
       opacity: 1;
     }
 
+    /* Khanar Bachan (খনার বচন) Vastu Compass Banner & 3D Projected Labels */
+    #vastu-banner {
+      position: fixed;
+      top: 74px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 14;
+      background: rgba(7, 17, 31, 0.84);
+      border: 1px solid rgba(232, 164, 83, 0.48);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 20px;
+      padding: 14px 22px;
+      text-align: center;
+      max-width: 680px;
+      width: calc(100% - 32px);
+      box-shadow: 0 16px 42px rgba(0, 0, 0, 0.75), 0 0 28px rgba(232, 164, 83, 0.12);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+
+    #vastu-banner.visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .vastu-verse-bn {
+      font-family: 'Noto Serif Bengali', serif;
+      font-size: clamp(0.95rem, 2.2vw, 1.18rem);
+      color: #f3e6d3;
+      line-height: 1.5;
+      margin-bottom: 4px;
+    }
+
+    .vastu-verse-en {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 0.9rem;
+      color: rgba(180, 199, 211, 0.82);
+      margin-bottom: 12px;
+    }
+
+    .vastu-dir-pills {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .vastu-dir-btn {
+      appearance: none;
+      background: rgba(40, 68, 91, 0.35);
+      border: 1px solid rgba(180, 199, 211, 0.25);
+      color: #e2edf5;
+      border-radius: 999px;
+      padding: 6px 13px;
+      font-family: 'Noto Serif Bengali', 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.74rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .vastu-dir-btn:hover, .vastu-dir-btn.active-dir {
+      border-color: var(--lantern-amber);
+      background: rgba(232, 164, 83, 0.18);
+      color: var(--lantern-amber);
+    }
+
+    /* 3D Projected World Markers for Khanar Bachan */
+    #vastu-markers-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.45s ease;
+    }
+
+    #vastu-markers-layer.visible {
+      opacity: 1;
+    }
+
+    .vastu-3d-pin {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      background: rgba(7, 17, 31, 0.82);
+      border: 1px solid rgba(232, 164, 83, 0.55);
+      border-radius: 12px;
+      padding: 6px 11px;
+      text-align: center;
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75);
+      transition: opacity 0.2s ease;
+    }
+
+    .vastu-pin-bn {
+      font-family: 'Noto Serif Bengali', serif;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--lantern-amber);
+      display: block;
+    }
+
+    .vastu-pin-en {
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--moon-silver);
+      display: block;
+    }
+
     /* Accessible Credits Modal */
     #credits-modal {
       position: fixed;
@@ -678,6 +793,38 @@
     <span>Drag or move pointer to look around the river • Press C for Cinematic Camera</span>
   </div>
 
+  <!-- Khanar Bachan (খনার বচন) Vastu Compass Banner -->
+  <aside id="vastu-banner" aria-label="Khanar Bachan Ecological Compass">
+    <div class="vastu-verse-bn">“পূর্বে হাঁস পশ্চিমে বাঁশ, উত্তরে কলা দক্ষিণে খোলা—তবেই হবে বাস্তু ও পুকুর ভালা।”</div>
+    <div class="vastu-verse-en">East: Ducks &amp; Morning Sun • West: Bamboo Windbreak • North: Banana Shelter • South: Open Breeze</div>
+    <div class="vastu-dir-pills">
+      <button id="vastu-btn-east" type="button" class="vastu-dir-btn">পূর্বে হাঁস (East Ducks)</button>
+      <button id="vastu-btn-west" type="button" class="vastu-dir-btn">পশ্চিমে বাঁশ (West Bamboo)</button>
+      <button id="vastu-btn-north" type="button" class="vastu-dir-btn">উত্তরে কলা (North Banana)</button>
+      <button id="vastu-btn-south" type="button" class="vastu-dir-btn">দক্ষিণে খোলা (South Open)</button>
+    </div>
+  </aside>
+
+  <!-- 3D Projected World Markers for Khanar Bachan -->
+  <div id="vastu-markers-layer" aria-hidden="true">
+    <div id="pin-east" class="vastu-3d-pin">
+      <span class="vastu-pin-bn">পূর্বে হাঁস</span>
+      <span class="vastu-pin-en">East • Duck Coop &amp; Ghat</span>
+    </div>
+    <div id="pin-west" class="vastu-3d-pin">
+      <span class="vastu-pin-bn">পশ্চিমে বাঁশ</span>
+      <span class="vastu-pin-en">West • Bamboo Windbreak</span>
+    </div>
+    <div id="pin-north" class="vastu-3d-pin">
+      <span class="vastu-pin-bn">উত্তরে কলা</span>
+      <span class="vastu-pin-en">North • Banana Homestead</span>
+    </div>
+    <div id="pin-south" class="vastu-3d-pin">
+      <span class="vastu-pin-bn">দক্ষিণে খোলা</span>
+      <span class="vastu-pin-en">South • Open River Channel</span>
+    </div>
+  </div>
+
   <!-- Interactive Viewing Controls HUD -->
   <header id="hud-layer">
     <div class="hud-top">
@@ -692,6 +839,9 @@
         </button>
         <button id="btn-explore" type="button" class="hud-btn hud-fadeable" title="Interactive Free-Look Camera">
           Explore Mode
+        </button>
+        <button id="btn-vastu" type="button" class="hud-btn hud-fadeable" title="Toggle Khanar Bachan Directional Compass (V)">
+          খনার বচন Compass
         </button>
         <button id="btn-sound" type="button" class="hud-btn hud-fadeable" title="Toggle Spatial Sound Engine (M)">
           <span id="sound-label">Sound: On</span>
@@ -734,7 +884,7 @@
       <div class="modal-role-line">A BAD TIME STUDIO EXPERIENCE</div>
       <div class="modal-role-line" style="color: #dce8f0;">CREATED BY K.I.ROHAN</div>
       <p class="modal-desc">
-        Set at 12:17 AM on a rural Bangladeshi river shortly after monsoon rainfall. Featuring custom GLSL Gerstner river shaders, an animated dingi nouka &amp; majhi, cantilevered khora jhal bamboo lift-nets, a distant midnight river launch, and a 9-layer procedural Web Audio spatial soundscape.
+        Set at 12:17 AM on a rural Bangladeshi river shortly after monsoon rainfall, arranged around the traditional Khanar Bachan (খনার বচন) ecological geometry: “পূর্বে হাঁস পশ্চিমে বাঁশ, উত্তরে কলা দক্ষিণে খোলা”.
       </p>
       <div class="modal-links-stack">
         <a href="https://facebook.com/badTimeStudio/" target="_blank" rel="noopener noreferrer" class="modal-ext-btn">
@@ -767,6 +917,7 @@
       const LOOP_DURATION = 75.0; // 75-second continuous single-take sequence
       let hasEntered = false;
       let isExploreMode = false;
+      let isVastuCompassActive = false;
       let isSoundMuted = false;
       let isUiHidden = false;
       let isScrubbing = false;
@@ -784,6 +935,7 @@
       // Synchronized event trackers so SFX trigger cleanly at exact timeline moments
       let lastOarCycleIndex = -1;
       let lastTrapCycleIndex = -1;
+      let lastDuckCycleIndex = -1;
       let lastHornTriggerCycle = -1;
       let lastBird1Cycle = -1;
       let lastBird2Cycle = -1;
@@ -793,7 +945,7 @@
       const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       // =========================================================================
-      // 2. 9-LAYER SPATIAL WEB AUDIO API ENGINE (100% PROCEDURAL)
+      // 2. 10-LAYER SPATIAL WEB AUDIO API ENGINE (100% PROCEDURAL)
       // =========================================================================
       class MidnightRiverSoundEngine {
         constructor() {
@@ -802,6 +954,7 @@
           this.reverbNode = null;
           this.boatPanner = null;
           this.trapPanner = null;
+          this.duckPanner = null;
           this.launchPanner = null;
           this.launchEngineGain = null;
           this.isInitialized = false;
@@ -842,7 +995,7 @@
           // Layer 2: Small waves lapping against timber hull & ghat
           this.setupWaveLappingLayer();
 
-          // Layer 3: Soft post-rain nighttime breeze
+          // Layer 3: Soft post-rain southern nighttime breeze (দক্ষিণা বাতাস)
           this.setupNightBreezeLayer();
 
           // Layer 4: Distant crickets & marsh frogs on riverbank
@@ -850,10 +1003,11 @@
 
           // Spatial Panners for Dynamic 3D Objects
           this.boatPanner = this.createSpatialPanner(0, 0, -25);
-          this.trapPanner = this.createSpatialPanner(16, 2, -26);
+          this.trapPanner = this.createSpatialPanner(-15, 2, -26); // West bamboo & fishing net
+          this.duckPanner = this.createSpatialPanner(13, 0.5, -16); // East ducks & ghat
           this.launchPanner = this.createSpatialPanner(-35, 4, -95);
 
-          // Layer 8: Distant Launch Diesel Engine Chug (continuous, distance-modulated)
+          // Layer 9: Distant Launch Diesel Engine Chug (continuous, distance-modulated)
           this.setupLaunchDieselLayer();
 
           this.isInitialized = true;
@@ -991,7 +1145,6 @@
         }
 
         setupCricketsAndFrogsLayer() {
-          // High-frequency rhythmic cricket stridulation on the right riverbank
           const cricketOsc = this.ctx.createOscillator();
           cricketOsc.type = 'sine';
           cricketOsc.frequency.value = 4320;
@@ -1013,7 +1166,6 @@
         }
 
         setupLaunchDieselLayer() {
-          // Low marine diesel engine chug (42 Hz triangle modulated at 5.5 Hz)
           const osc = this.ctx.createOscillator();
           osc.type = 'sawtooth';
           osc.frequency.value = 41.0;
@@ -1040,12 +1192,60 @@
           chugLfo.start();
         }
 
+        // Trigger Layer 5: Eastern Ducks (পূর্বে হাঁস) Soft Quack Murmur & Paddling Splash
+        triggerEasternDucksMurmur() {
+          if (!this.isInitialized || isSoundMuted) return;
+          const now = this.ctx.currentTime;
+
+          // Double soft nasal duck murmur (formant-filtered sawtooth 390 Hz -> 310 Hz)
+          for (let q = 0; q < 2; q++) {
+            const start = now + q * 0.24;
+            const osc = this.ctx.createOscillator();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(395 - q * 25, start);
+            osc.frequency.exponentialRampToValueAtTime(285, start + 0.16);
+
+            const formant = this.ctx.createBiquadFilter();
+            formant.type = 'bandpass';
+            formant.frequency.value = 820;
+            formant.Q.value = 3.5;
+
+            const g = this.ctx.createGain();
+            g.gain.setValueAtTime(0.0005, start);
+            g.gain.linearRampToValueAtTime(0.032, start + 0.03);
+            g.gain.exponentialRampToValueAtTime(0.0005, start + 0.18);
+
+            osc.connect(formant);
+            formant.connect(g);
+            g.connect(this.duckPanner);
+            osc.start(start);
+            osc.stop(start + 0.19);
+          }
+
+          // Gentle duck wing/foot water ripple splash
+          const splashSrc = this.ctx.createBufferSource();
+          splashSrc.buffer = this.noiseBuffer;
+          const bp = this.ctx.createBiquadFilter();
+          bp.type = 'bandpass';
+          bp.frequency.value = 920;
+          bp.Q.value = 2.4;
+
+          const sg = this.ctx.createGain();
+          sg.gain.setValueAtTime(0.001, now + 0.15);
+          sg.gain.linearRampToValueAtTime(0.075, now + 0.3);
+          sg.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+
+          splashSrc.connect(bp);
+          bp.connect(sg);
+          sg.connect(this.duckPanner);
+          splashSrc.start(now + 0.15, 2.0, 0.8);
+        }
+
         // Trigger Layer 6: Wooden Hull Creak + Majhi Oar Water Plunge
         triggerOarAndHullCreak() {
           if (!this.isInitialized || isSoundMuted) return;
           const now = this.ctx.currentTime;
 
-          // 1. Timber hull creak (resonant stick-slip groan 245 Hz -> 190 Hz)
           const osc = this.ctx.createOscillator();
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(248, now);
@@ -1067,7 +1267,6 @@
           osc.start(now);
           osc.stop(now + 1.0);
 
-          // 2. Oar water plunge splash (0.3s after creak begins)
           const splashSrc = this.ctx.createBufferSource();
           splashSrc.buffer = this.noiseBuffer;
 
@@ -1108,12 +1307,11 @@
           osc.stop(now + 0.12);
         }
 
-        // Trigger Layer 7b: Bamboo Fishing Trap (Khora Jhal) Lift Creak & Net Water Drip
+        // Trigger Layer 8: Western Bamboo Windbreak & Fishing Trap (Khora Jhal) Lift Creak
         triggerBambooTrapLift() {
           if (!this.isInitialized || isSoundMuted) return;
           const now = this.ctx.currentTime;
 
-          // Hollow bamboo tension flex
           const osc = this.ctx.createOscillator();
           osc.type = 'sawtooth';
           osc.frequency.setValueAtTime(480, now);
@@ -1135,7 +1333,6 @@
           osc.start(now);
           osc.stop(now + 0.75);
 
-          // Water droplets trickling from lifted mesh net
           const dripSrc = this.ctx.createBufferSource();
           dripSrc.buffer = this.noiseBuffer;
           const dripBp = this.ctx.createBiquadFilter();
@@ -1154,7 +1351,7 @@
           dripSrc.start(now + 0.4, 1.0, 1.8);
         }
 
-        // Trigger Layer 5: Nocturnal River Bird Call (Nishibok / Night Heron)
+        // Trigger Layer 6b: Nocturnal River Bird Call (Nishibok / Night Heron)
         triggerNightBirdCall() {
           if (!this.isInitialized || isSoundMuted) return;
           const now = this.ctx.currentTime;
@@ -1174,11 +1371,11 @@
           osc.stop(now + 0.9);
         }
 
-        // Trigger Layer 9: Deep Distant Bangladeshi River-Launch Horn (at 42.5s)
+        // Trigger Layer 10: Deep Distant Bangladeshi River-Launch Horn (at 42.5s)
         triggerDistantLaunchHorn() {
           if (!this.isInitialized || isSoundMuted) return;
           const now = this.ctx.currentTime;
-          const freqs = [32.70, 65.41, 98.00, 130.81]; // C1 sub, C2, G2, C3 brassy launch chord
+          const freqs = [32.70, 65.41, 98.00, 130.81];
           const weights = [0.45, 0.55, 0.35, 0.18];
 
           const lp = this.ctx.createBiquadFilter();
@@ -1221,7 +1418,6 @@
           if (this.launchPanner) {
             this.launchPanner.setPosition(launchPos.x, launchPos.y, launchPos.z);
           }
-          // Modulate distant launch diesel chug audible window (36s - 60s)
           if (this.launchEngineGain) {
             let chugLevel = 0.001;
             if (timelineSec > 36 && timelineSec < 60) {
@@ -1262,16 +1458,15 @@
 
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x030A12);
-      scene.fog = new THREE.FogExp2(0x07111F, 0.022);
+      scene.fog = new THREE.FogExp2(0x07111F, 0.021);
 
       camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 260);
       camera.position.set(0, 1.35, 18);
 
-      // Ambient & Moonlight Illumination
-      const hemiLight = new THREE.HemisphereLight(0x28445B, 0x030A12, 0.65);
+      const hemiLight = new THREE.HemisphereLight(0x28445B, 0x030A12, 0.68);
       scene.add(hemiLight);
 
-      const moonDirLight = new THREE.DirectionalLight(0xB4C7D3, 0.85);
+      const moonDirLight = new THREE.DirectionalLight(0xB4C7D3, 0.88);
       moonDirLight.position.set(-28, 38, -95);
       scene.add(moonDirLight);
 
@@ -1285,7 +1480,6 @@
       moonMesh.position.set(-28, 36, -135);
       skyGroup.add(moonMesh);
 
-      // Soft Moon Halo Sprite
       function createRadialGlowTexture(colorHex, stopAlpha) {
         const c = document.createElement('canvas');
         c.width = 256; c.height = 256;
@@ -1311,7 +1505,6 @@
       moonHalo.position.copy(moonMesh.position);
       skyGroup.add(moonHalo);
 
-      // Drifting Monsoon Cloud Planes in front of the Moon
       const cloudPlanes = [];
       const cloudTex = createRadialGlowTexture('rgba(12, 26, 44, 0.78)', 'rgba(7, 17, 31, 0.35)');
       for (let i = 0; i < 14; i++) {
@@ -1329,15 +1522,16 @@
       }
 
       // =========================================================================
-      // CUSTOM GLSL RIVER WATER SHADER (Gerstner Waves + Kelvin Wake + Ripples)
+      // CUSTOM GLSL RIVER WATER SHADER (Gerstner Waves + Kelvin Wake + Duck/Trap Ripples)
       // =========================================================================
       const waterUniforms = {
         uTime: { value: 0 },
         uBoatPos: { value: new THREE.Vector3(0, 0, -25) },
         uLanternPos: { value: new THREE.Vector3(0, 1.3, -23) },
         uLanternIntensity: { value: 1.0 },
-        uOarRipple: { value: new THREE.Vector4(0, 0, -25, -10.0) }, // x, y, z, birthTime
-        uTrapRipple: { value: new THREE.Vector4(16, 0, -26, -10.0) },
+        uOarRipple: { value: new THREE.Vector4(0, 0, -25, -10.0) },
+        uTrapRipple: { value: new THREE.Vector4(-12, 0, -24, -10.0) },
+        uDuckRipple: { value: new THREE.Vector4(12.5, 0, -15.5, 0.0) },
         uMoonDir: { value: new THREE.Vector3(-28, 36, -135).normalize() },
         uSheetLightning: { value: 0.0 },
         uFogColor: { value: new THREE.Color(0x07111F) },
@@ -1349,12 +1543,12 @@
         uniform vec3 uBoatPos;
         uniform vec4 uOarRipple;
         uniform vec4 uTrapRipple;
+        uniform vec4 uDuckRipple;
 
         varying vec3 vWorldPos;
         varying vec3 vNormal;
         varying float vWaveHeight;
 
-        // 2D Simplex-like hash noise for natural river irregularity
         float hash(vec2 p) {
           return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
         }
@@ -1372,8 +1566,8 @@
 
         float calcRiverHeight(vec2 xz) {
           float t = uTime;
-          // 4-octave directional river waves
-          float w1 = sin(xz.x * 0.42 + xz.y * 0.28 + t * 1.35) * 0.09;
+          // 4-octave directional river waves (sweeping from the open South +Z toward North -Z)
+          float w1 = sin(xz.x * 0.42 + xz.y * 0.32 + t * 1.35) * 0.09;
           float w2 = cos(xz.x * 0.85 - xz.y * 0.62 + t * 1.95) * 0.045;
           float w3 = sin(xz.x * 1.9 + xz.y * 1.4 - t * 2.6) * 0.022;
           float w4 = (noise(xz * 0.65 + vec2(t * 0.45, -t * 0.35)) - 0.5) * 0.06;
@@ -1387,12 +1581,16 @@
           float dOar = length(xz - uOarRipple.xz);
           float oarRing = sin(dOar * 6.0 - oarAge * 7.5) * exp(-dOar * 0.32) * exp(-oarAge * 0.85) * 0.055;
 
-          // Bamboo Trap (Khora Jhal) Net Drip Ripple
+          // Western Bamboo Trap (Khora Jhal) Net Drip Ripple
           float trapAge = max(0.0, t - uTrapRipple.w);
           float dTrap = length(xz - uTrapRipple.xz);
           float trapRing = sin(dTrap * 5.0 - trapAge * 6.5) * exp(-dTrap * 0.25) * exp(-trapAge * 0.65) * 0.045;
 
-          return w1 + w2 + w3 + w4 + boatWake + oarRing + trapRing;
+          // Eastern Ducks (পূর্বে হাঁস) Continuous Paddling Micro-Ripples
+          float dDuck = length(xz - uDuckRipple.xz);
+          float duckRing = sin(dDuck * 7.5 - t * 6.2) * exp(-dDuck * 0.38) * 0.032;
+
+          return w1 + w2 + w3 + w4 + boatWake + oarRing + trapRing + duckRing;
         }
 
         void main() {
@@ -1408,7 +1606,6 @@
           vWorldPos = worldPosition.xyz;
           vWaveHeight = h;
 
-          // Finite-difference normal
           vNormal = normalize(vec3(h - hx, eps, h - hz));
           gl_Position = projectionMatrix * viewMatrix * worldPosition;
         }
@@ -1443,32 +1640,26 @@
         }
 
         void main() {
-          // Micro normal perturbation for post-rain shimmering water texture
           vec2 uv = vWorldPos.xz;
           float m1 = noise(uv * 3.8 + vec2(uTime * 1.1, -uTime * 0.8));
           float m2 = noise(uv * 8.5 - vec2(uTime * 1.7, uTime * 1.3));
           vec3 N = normalize(vNormal + vec3((m1 - 0.5) * 0.26, 0.0, (m2 - 0.5) * 0.26));
 
           vec3 V = normalize(cameraPosition - vWorldPos);
-          vec3 R = reflect(-V, N);
 
-          // Schlick Fresnel Approximation (F0 = 0.02 for water)
           float cosTheta = max(dot(N, V), 0.0);
           float fresnel = 0.02 + 0.98 * pow(1.0 - cosTheta, 5.0);
 
-          // Base colors from palette: Deep river black (#030A12) & Midnight blue (#07111F)
           vec3 deepWater = vec3(0.012, 0.039, 0.071);
           vec3 skyReflect = vec3(0.045, 0.105, 0.185) + vec3(0.12, 0.16, 0.22) * uSheetLightning;
           vec3 color = mix(deepWater, skyReflect, fresnel * 0.72);
 
-          // Distorted Moonlight Silver (#B4C7D3) Specular Path
           vec3 H_moon = normalize(uMoonDir + V);
           float moonSpec1 = pow(max(dot(N, H_moon), 0.0), 110.0) * 1.35;
           float moonSpec2 = pow(max(dot(N, H_moon), 0.0), 18.0) * 0.22;
           vec3 moonColor = vec3(0.706, 0.780, 0.827);
           color += moonColor * (moonSpec1 + moonSpec2);
 
-          // Warm Kerosene Lantern (#E8A453) Point Light & Shimmering Water Column
           vec3 toLantern = uLanternPos - vWorldPos;
           float distL = length(toLantern);
           vec3 L = normalize(toLantern);
@@ -1479,7 +1670,6 @@
           vec3 amberColor = vec3(0.910, 0.643, 0.325);
           color += amberColor * (lanternSpec + lanternDiff) * atten * uLanternIntensity;
 
-          // Subtle Exp2 Atmospheric Fog blending
           float distCam = length(cameraPosition - vWorldPos);
           float fogFactor = 1.0 - exp(-pow(distCam * uFogDensity, 2.0));
           color = mix(color, uFogColor + vec3(0.08, 0.11, 0.15) * uSheetLightning, clamp(fogFactor, 0.0, 1.0));
@@ -1498,9 +1688,8 @@
       const waterMesh = new THREE.Mesh(waterGeo, waterMat);
       scene.add(waterMesh);
 
-      // Helper function matching vertex wave math for accurate boat buoyancy
       function sampleWaveHeight(x, z, t) {
-        const w1 = Math.sin(x * 0.42 + z * 0.28 + t * 1.35) * 0.09;
+        const w1 = Math.sin(x * 0.42 + z * 0.32 + t * 1.35) * 0.09;
         const w2 = Math.cos(x * 0.85 - z * 0.62 + t * 1.95) * 0.045;
         return w1 + w2;
       }
@@ -1511,7 +1700,6 @@
       const boatGroup = new THREE.Group();
       scene.add(boatGroup);
 
-      // Curved Weathered Timber Hull (Dingi Nouka profile)
       const hullLength = 6.6;
       const hullGeo = new THREE.CylinderGeometry(0.68, 0.52, hullLength, 20, 24, false);
       hullGeo.rotateZ(Math.PI / 2);
@@ -1521,14 +1709,11 @@
         let vy = posAttr.getY(i);
         let vz = posAttr.getZ(i);
         const normX = Math.min(1.0, Math.abs(vx) / (hullLength * 0.5));
-        // Pinch bow and stern into graceful upturned Bangladeshi nouka গলুই (golui)
         const pinch = Math.max(0.03, 1.0 - Math.pow(normX, 1.85));
         vz *= pinch * 1.25;
         if (vy > 0) {
-          // Hollow out interior deck slightly
           vy *= 0.22;
         }
-        // Upturned prow/stern curve
         vy += Math.pow(normX, 2.6) * 0.58;
         posAttr.setXYZ(i, vx, vy, vz);
       }
@@ -1543,7 +1728,6 @@
       hullMesh.position.y = 0.08;
       boatGroup.add(hullMesh);
 
-      // Woven Arched Bamboo Canopy (Chhai / ছই)
       const chhaiGeo = new THREE.CylinderGeometry(0.76, 0.76, 2.35, 16, 8, true, 0, Math.PI);
       chhaiGeo.rotateZ(Math.PI / 2);
       chhaiGeo.rotateX(Math.PI / 2);
@@ -1556,7 +1740,6 @@
       chhaiMesh.position.set(-0.25, 0.22, 0);
       boatGroup.add(chhaiMesh);
 
-      // Bamboo ribs on Chhai
       for (let r = -1.0; r <= 1.0; r += 0.5) {
         const ribGeo = new THREE.TorusGeometry(0.77, 0.022, 8, 20, Math.PI);
         ribGeo.rotateY(Math.PI / 2);
@@ -1565,7 +1748,6 @@
         boatGroup.add(rib);
       }
 
-      // Silhouetted Majhi (Boatman) at the stern + Articulated Wooden Boitha (Oar)
       const majhiGroup = new THREE.Group();
       majhiGroup.position.set(-2.05, 0.32, 0);
       boatGroup.add(majhiGroup);
@@ -1579,7 +1761,6 @@
       headMesh.position.set(0.04, 0.82, 0);
       majhiGroup.add(headMesh);
 
-      // Articulated Oar (Boitha)
       const oarPivot = new THREE.Group();
       oarPivot.position.set(0.15, 0.48, 0.28);
       majhiGroup.add(oarPivot);
@@ -1594,7 +1775,6 @@
       oarBlade.position.set(0, -0.95, 1.65);
       oarPivot.add(oarBlade);
 
-      // Bow Crooked Wooden Post & Swinging Kerosene Hariken Lantern
       const lanternPost = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.032, 1.15, 8), darkTimberMat);
       lanternPost.position.set(2.35, 0.68, 0);
       lanternPost.rotation.z = -0.28;
@@ -1619,7 +1799,6 @@
       harikenBase.position.y = -0.28;
       lanternSwingGroup.add(harikenBase);
 
-      // Warm Amber PointLight & Halo Sprite attached to Hariken
       const lanternLight = new THREE.PointLight(0xE8A453, 2.6, 28, 1.8);
       lanternLight.position.set(0, -0.16, 0);
       lanternSwingGroup.add(lanternLight);
@@ -1635,87 +1814,190 @@
       lanternGlowSprite.position.set(0, -0.16, 0);
       lanternSwingGroup.add(lanternGlowSprite);
 
-      // Boat 75-second Catmull-Rom Spline Path across the Padma/Meghna
+      // Boat 75-second Catmull-Rom Spline Path gliding between West Bamboo & East Ducks
       const boatSpline = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(-34, 0, -58), // 00s: Deep in the mist
-        new THREE.Vector3(-18, 0, -38), // 15s: Approaching past the bamboo net
-        new THREE.Vector3(-4,  0, -18), // 30s: Passing foreground-midground
-        new THREE.Vector3(7,   0, -14), // 40s: Closest passage to viewer
-        new THREE.Vector3(18,  0, -26), // 55s: Drifting downstream
-        new THREE.Vector3(32,  0, -54)  // 75s: Receding into the midnight fog
+        new THREE.Vector3(-26, 0, -56),
+        new THREE.Vector3(-12, 0, -34),
+        new THREE.Vector3(-2,  0, -17),
+        new THREE.Vector3(5,   0, -13),
+        new THREE.Vector3(11,  0, -24),
+        new THREE.Vector3(22,  0, -52)
       ]);
 
       // =========================================================================
-      // 5. RURAL BANGLADESHI RIVERBANK, ANIMATED KHORA JHAL NET, GHAT & FLORA
+      // 5. KHANAR BACHAN (খনার বচন) FOUR-DIRECTION ECOLOGICAL ARCHITECTURE
+      //    “পূর্বে হাঁস পশ্চিমে বাঁশ, উত্তরে কলা দক্ষিণে খোলা”
       // =========================================================================
-      const riverbankGroup = new THREE.Group();
-      scene.add(riverbankGroup);
-
       const mudMat = new THREE.MeshStandardMaterial({ color: 0x050D14, roughness: 0.88 });
-      const foliageMat = new THREE.MeshStandardMaterial({ color: 0x061018, roughness: 0.75 });
+      const foliageMat = new THREE.MeshStandardMaterial({ color: 0x06121a, roughness: 0.72 });
+      const bananaLeafMat = new THREE.MeshStandardMaterial({
+        color: 0x0b211d,
+        roughness: 0.38,
+        metalness: 0.12,
+        side: THREE.DoubleSide
+      });
 
-      // Starboard Muddy Shoreline Embankment
-      const shoreGeo = new THREE.BoxGeometry(38, 2.6, 150);
-      const shoreMesh = new THREE.Mesh(shoreGeo, mudMat);
-      shoreMesh.position.set(34, -0.6, -42);
-      shoreMesh.rotation.y = -0.12;
-      riverbankGroup.add(shoreMesh);
+      // -------------------------------------------------------------------------
+      // DIRECTION 1: EAST — পূর্বে হাঁস (Eastern Ghat, Woven Duck Coop & Swimming Ducks)
+      // -------------------------------------------------------------------------
+      const eastBankGroup = new THREE.Group();
+      scene.add(eastBankGroup);
 
-      // Wooden Village Ghat (Stepped Jetty & Moored Second Nouka)
+      const eastShoreMesh = new THREE.Mesh(new THREE.BoxGeometry(34, 2.4, 95), mudMat);
+      eastShoreMesh.position.set(30, -0.6, -28);
+      eastShoreMesh.rotation.y = -0.08;
+      eastBankGroup.add(eastShoreMesh);
+
+      // Stepped Wooden Village Ghat on the East Bank
       const ghatGroup = new THREE.Group();
-      ghatGroup.position.set(15.5, 0.0, -20);
-      riverbankGroup.add(ghatGroup);
+      ghatGroup.position.set(14.2, 0.0, -17.5);
+      eastBankGroup.add(ghatGroup);
 
-      const deckPlank = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.14, 2.2), darkTimberMat);
-      deckPlank.position.set(1.2, 0.65, 0);
+      const deckPlank = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.14, 2.3), darkTimberMat);
+      deckPlank.position.set(1.0, 0.58, 0);
       ghatGroup.add(deckPlank);
 
-      for (let px = -1.2; px <= 3.2; px += 1.4) {
-        for (let pz = -0.85; pz <= 0.85; pz += 1.7) {
-          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 2.2, 8), darkTimberMat);
-          post.position.set(px, 0.1, pz);
+      for (let px = -1.0; px <= 2.8; px += 1.25) {
+        for (let pz = -0.9; pz <= 0.9; pz += 1.8) {
+          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), darkTimberMat);
+          post.position.set(px, 0.05, pz);
           ghatGroup.add(post);
         }
       }
 
-      // Moored empty boat bobbing gently at the village ghat
-      const mooredBoat = hullMesh.clone();
-      mooredBoat.scale.set(0.72, 0.72, 0.72);
-      mooredBoat.position.set(13.2, 0.06, -18.2);
-      mooredBoat.rotation.y = 0.35;
-      scene.add(mooredBoat);
+      // Woven Bamboo Duck Coop (হাঁসের খোপ / Hansher Khop) on the Eastern Bank
+      const duckCoopGroup = new THREE.Group();
+      duckCoopGroup.position.set(16.8, 0.65, -14.2);
+      duckCoopGroup.rotation.y = -0.35;
+      eastBankGroup.add(duckCoopGroup);
 
-      // Animated Cantilevered Bamboo Fishing Trap (Cheena Jhal / Khora Jhal)
+      const coopBody = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.85, 1.35), chhaiMat);
+      coopBody.position.y = 0.42;
+      duckCoopGroup.add(coopBody);
+
+      const coopRoof = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.72, 0.72, 1.78, 12, 1, false, 0, Math.PI),
+        darkTimberMat
+      );
+      coopRoof.rotation.z = Math.PI / 2;
+      coopRoof.rotation.x = Math.PI / 2;
+      coopRoof.position.y = 0.84;
+      duckCoopGroup.add(coopRoof);
+
+      // Small wooden duck ramp leading down to the eastern water
+      const duckRamp = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.05, 0.48), darkTimberMat);
+      duckRamp.position.set(-1.1, 0.12, 0);
+      duckRamp.rotation.z = 0.36;
+      duckCoopGroup.add(duckRamp);
+
+      // Subtle warm glow near the duck coop & ghat
+      const ghatLight = new THREE.PointLight(0xE8A453, 0.75, 14, 2.0);
+      ghatLight.position.set(15.5, 1.6, -15.5);
+      eastBankGroup.add(ghatLight);
+
+      // 5 White & Spotted Bangladeshi Ducks (পাতিহাঁস) Swimming & Bobbing in the East
+      const duckFlock = [];
+      const duckFeatherMat = new THREE.MeshStandardMaterial({
+        color: 0xdce6ed,
+        roughness: 0.55
+      });
+      const duckBeakMat = new THREE.MeshStandardMaterial({
+        color: 0xd89448,
+        roughness: 0.4
+      });
+
+      function createDuckMesh() {
+        const dGroup = new THREE.Group();
+        const body = new THREE.Mesh(new THREE.SphereGeometry(0.21, 12, 10), duckFeatherMat);
+        body.scale.set(1.45, 0.78, 0.92);
+        body.position.y = 0.06;
+        dGroup.add(body);
+
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.075, 0.22, 8), duckFeatherMat);
+        neck.position.set(0.22, 0.20, 0);
+        neck.rotation.z = -0.25;
+        dGroup.add(neck);
+
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.085, 10, 10), duckFeatherMat);
+        head.position.set(0.26, 0.31, 0);
+        dGroup.add(head);
+
+        const beak = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.12, 6), duckBeakMat);
+        beak.rotation.z = -Math.PI / 2;
+        beak.position.set(0.35, 0.30, 0);
+        dGroup.add(beak);
+
+        return dGroup;
+      }
+
+      const duckConfigs = [
+        { cx: 11.8, cz: -14.8, rx: 1.4, rz: 0.9, speed: 0.55, phase: 0.0 },
+        { cx: 12.9, cz: -15.8, rx: 1.1, rz: 1.2, speed: 0.48, phase: 1.7 },
+        { cx: 10.9, cz: -16.2, rx: 0.9, rz: 0.8, speed: 0.62, phase: 3.1 },
+        { cx: 13.6, cz: -13.9, rx: 0.7, rz: 0.7, speed: 0.42, phase: 4.5 },
+        { cx: 14.8, cz: -13.2, rx: 0.3, rz: 0.3, speed: 0.30, phase: 2.2 }
+      ];
+
+      duckConfigs.forEach((dc) => {
+        const duck = createDuckMesh();
+        scene.add(duck);
+        duckFlock.push({ mesh: duck, cfg: dc });
+      });
+
+      // -------------------------------------------------------------------------
+      // DIRECTION 2: WEST — পশ্চিমে বাঁশ (Western Bamboo Windbreak & Khora Jhal Net)
+      // -------------------------------------------------------------------------
+      const westBankGroup = new THREE.Group();
+      scene.add(westBankGroup);
+
+      const westShoreMesh = new THREE.Mesh(new THREE.BoxGeometry(32, 2.5, 95), mudMat);
+      westShoreMesh.position.set(-30, -0.6, -32);
+      westShoreMesh.rotation.y = 0.1;
+      westBankGroup.add(westShoreMesh);
+
+      // Dense Tall Swaying Bamboo Groves (বাঁশঝাড়) on the Western Bank (-X)
+      const bambooCulms = [];
+      for (let i = 0; i < 52; i++) {
+        const h = 6.5 + (i % 6) * 1.55;
+        const culm = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.068, h, 6), foliageMat);
+        const bx = -16.5 - (i % 8) * 1.65;
+        const bz = -10 - i * 1.15;
+        culm.position.set(bx, h * 0.46, bz);
+        // Arching gracefully toward the river
+        const baseLean = -0.10 - (i % 4) * 0.055;
+        culm.rotation.z = baseLean;
+        westBankGroup.add(culm);
+        bambooCulms.push({ mesh: culm, baseRotZ: baseLean, phase: i * 0.65 });
+      }
+
+      // Animated Cantilevered Bamboo Fishing Trap (Khora Jhal) on the West Bank
       const trapFulcrumGroup = new THREE.Group();
-      trapFulcrumGroup.position.set(16.0, 0.9, -28.0);
+      trapFulcrumGroup.position.set(-15.5, 0.9, -24.0);
       scene.add(trapFulcrumGroup);
 
-      // Fixed shore support posts
       const postL = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 3.6, 8), darkTimberMat);
-      postL.position.set(16.8, 0.8, -26.8);
+      postL.position.set(-16.3, 0.8, -22.8);
       scene.add(postL);
       const postR = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 3.6, 8), darkTimberMat);
-      postR.position.set(16.8, 0.8, -29.2);
+      postR.position.set(-16.3, 0.8, -25.2);
       scene.add(postR);
 
-      // Pivoting X-frame bamboo arms
-      const pole1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 9.5, 8), darkTimberMat);
-      pole1.rotation.z = Math.PI / 2.3;
-      pole1.position.set(-3.2, 1.4, -0.9);
+      const pole1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 9.2, 8), darkTimberMat);
+      pole1.rotation.z = -Math.PI / 2.3;
+      pole1.position.set(3.1, 1.4, -0.9);
       trapFulcrumGroup.add(pole1);
 
-      const pole2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 9.5, 8), darkTimberMat);
-      pole2.rotation.z = Math.PI / 2.3;
-      pole2.position.set(-3.2, 1.4, 0.9);
+      const pole2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 9.2, 8), darkTimberMat);
+      pole2.rotation.z = -Math.PI / 2.3;
+      pole2.position.set(3.1, 1.4, 0.9);
       trapFulcrumGroup.add(pole2);
 
       const crossBar = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 3.4, 8), darkTimberMat);
       crossBar.rotation.x = Math.PI / 2;
-      crossBar.position.set(-6.8, 2.8, 0);
+      crossBar.position.set(6.5, 2.7, 0);
       trapFulcrumGroup.add(crossBar);
 
-      // Suspended parabolic mesh fishing net
-      const netGeo = new THREE.ConeGeometry(2.4, 2.1, 4, 1, true);
+      const netGeo = new THREE.ConeGeometry(2.3, 2.0, 4, 1, true);
       netGeo.rotateY(Math.PI / 4);
       const netMat = new THREE.MeshBasicMaterial({
         color: 0x28445B,
@@ -1724,16 +2006,34 @@
         opacity: 0.38
       });
       const netMesh = new THREE.Mesh(netGeo, netMat);
-      netMesh.position.set(-6.2, 1.4, 0);
+      netMesh.position.set(6.0, 1.35, 0);
       netMesh.rotation.x = Math.PI;
       trapFulcrumGroup.add(netMesh);
 
-      // Tin-Roofed Village Huts (Chala Ghar) with Warm Kerosene Window Glows
+      // -------------------------------------------------------------------------
+      // DIRECTION 3: NORTH — উত্তরে কলা (Northern Homestead & Broad Banana Grove)
+      // -------------------------------------------------------------------------
+      const northHomesteadGroup = new THREE.Group();
+      scene.add(northHomesteadGroup);
+
+      // Northern Raised Homestead Embankment (ভিটা / Bhita)
+      const northBhita = new THREE.Mesh(new THREE.BoxGeometry(36, 2.6, 24), mudMat);
+      northBhita.position.set(8, -0.5, -42);
+      northHomesteadGroup.add(northBhita);
+
+      // Moored second boat near the northern-east bend
+      const mooredBoat = hullMesh.clone();
+      mooredBoat.scale.set(0.72, 0.72, 0.72);
+      mooredBoat.position.set(9.8, 0.06, -27.5);
+      mooredBoat.rotation.y = 0.45;
+      scene.add(mooredBoat);
+
+      // Tin-Roofed Village Huts (Chala Ghar) on the Northern Homestead
       const villageWindows = [];
       const hutPositions = [
-        { x: 24, y: 1.4, z: -26, rot: -0.25 },
-        { x: 27, y: 1.7, z: -38, rot: -0.15 },
-        { x: 25, y: 1.5, z: -52, rot: -0.32 }
+        { x: 6.5,  y: 1.5, z: -34.5, rot: 0.12 },
+        { x: 13.5, y: 1.6, z: -33.0, rot: -0.22 },
+        { x: 18.5, y: 1.5, z: -28.0, rot: -0.38 }
       ];
       hutPositions.forEach((hp) => {
         const hut = new THREE.Group();
@@ -1752,31 +2052,66 @@
         roof.position.y = 1.65;
         hut.add(roof);
 
-        // Warm amber shuttered window glow
-        const winMat = new THREE.MeshBasicMaterial({ color: 0xE8A453, transparent: true, opacity: 0.75 });
-        const winMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.52), winMat);
-        winMesh.position.set(-1.81, 0.1, 0.3);
-        winMesh.rotation.y = -Math.PI / 2;
+        const winMat = new THREE.MeshBasicMaterial({ color: 0xE8A453, transparent: true, opacity: 0.82 });
+        const winMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.44, 0.54), winMat);
+        winMesh.position.set(0, 0.1, 1.42);
         hut.add(winMesh);
         villageWindows.push(winMat);
 
-        riverbankGroup.add(hut);
+        northHomesteadGroup.add(hut);
       });
 
-      // Bamboo Groves (Baashjhar) & Swaying Trees along the Bank
-      const bambooCulms = [];
-      for (let i = 0; i < 42; i++) {
-        const h = 5.5 + (i % 5) * 1.4;
-        const culm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, h, 6), foliageMat);
-        const bx = 18.5 + (i % 7) * 1.8;
-        const bz = -10 - i * 1.65;
-        culm.position.set(bx, h * 0.45, bz);
-        culm.rotation.z = 0.08 + (i % 4) * 0.05;
-        riverbankGroup.add(culm);
-        bambooCulms.push({ mesh: culm, baseRotZ: culm.rotation.z, phase: i * 0.7 });
+      // Broad-Leaved Banana Grove (কলাবাগান — উত্তরে কলা) sheltering the North
+      const bananaFronds = [];
+      function createBananaTree(tx, ty, tz, scale) {
+        const tree = new THREE.Group();
+        tree.position.set(tx, ty, tz);
+        tree.scale.set(scale, scale, scale);
+
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.16, 2.4, 8), foliageMat);
+        trunk.position.y = 1.2;
+        tree.add(trunk);
+
+        // 6 broad arching banana fronds per tree
+        for (let f = 0; f < 6; f++) {
+          const angle = (f / 6) * Math.PI * 2 + (tx * 0.3);
+          const frondPivot = new THREE.Group();
+          frondPivot.position.set(0, 2.3, 0);
+          frondPivot.rotation.y = angle;
+
+          const leafGeo = new THREE.PlaneGeometry(0.55, 2.3, 2, 6);
+          const pos = leafGeo.attributes.position;
+          for (let k = 0; k < pos.count; k++) {
+            const ly = pos.getY(k) + 1.15; // 0 to 2.3
+            pos.setY(k, ly);
+            // Arch outward and droop at tip
+            const droop = -Math.pow(ly / 2.3, 2.1) * 0.65;
+            pos.setZ(k, droop);
+          }
+          leafGeo.computeVertexNormals();
+
+          const leafMesh = new THREE.Mesh(leafGeo, bananaLeafMat);
+          leafMesh.rotation.x = 0.52;
+          frondPivot.add(leafMesh);
+          tree.add(frondPivot);
+          bananaFronds.push({ mesh: leafMesh, baseRotX: 0.52, phase: f + tx });
+        }
+        northHomesteadGroup.add(tree);
       }
 
-      // Drifting Water Hyacinth Clusters (Kochuripana) on the River Surface
+      const bananaCoords = [
+        [2.5, 0.4, -36], [5.0, 0.5, -38], [8.2, 0.6, -37], [11.0, 0.6, -36.5],
+        [14.8, 0.5, -35.5], [17.2, 0.5, -32.0], [19.8, 0.4, -25.0], [21.0, 0.4, -21.5],
+        [4.0, 0.4, -33.5], [10.0, 0.5, -34.2], [16.2, 0.4, -30.0]
+      ];
+      bananaCoords.forEach((bc, idx) => {
+        createBananaTree(bc[0], bc[1], bc[2], 0.95 + (idx % 3) * 0.18);
+      });
+
+      // -------------------------------------------------------------------------
+      // DIRECTION 4: SOUTH — দক্ষিণে খোলা (Open Unobstructed Southern Channel)
+      // Drifting Water Hyacinth Clusters (Kochuripana) carried by the southern breeze
+      // -------------------------------------------------------------------------
       const hyacinthClusters = [];
       for (let c = 0; c < 12; c++) {
         const cluster = new THREE.Group();
@@ -1786,7 +2121,7 @@
           pad.position.set((Math.random() - 0.5) * 0.9, 0.02, (Math.random() - 0.5) * 0.9);
           cluster.add(pad);
         }
-        cluster.position.set(-8 + (c % 5) * 5.2, 0.0, 12 - c * 5.5);
+        cluster.position.set(-7 + (c % 5) * 4.2, 0.0, 12 - c * 5.2);
         scene.add(cluster);
         hyacinthClusters.push({ group: cluster, baseZ: cluster.position.z, speed: 0.22 + (c % 3) * 0.06 });
       }
@@ -1810,7 +2145,6 @@
       deck2.position.y = 3.6;
       launchGroup.add(deck2);
 
-      // Warm Illuminated Cabin Tier Window Rows
       const launchWindowMats = [];
       for (let row = 0; row < 2; row++) {
         for (let w = -4.8; w <= 4.8; w += 1.2) {
@@ -1822,7 +2156,6 @@
         }
       }
 
-      // Sweeping Volumetric Searchlight Cone from Launch Bridge
       const beamGeo = new THREE.ConeGeometry(5.5, 36, 20, 1, true);
       beamGeo.translate(0, -18, 0);
       beamGeo.rotateZ(-Math.PI / 2);
@@ -1841,13 +2174,13 @@
       // =========================================================================
       // 7. BIOLUMINESCENT FIREFLIES (JONAKI POKA) & VOLUMETRIC MIST BILLBOARDS
       // =========================================================================
-      const fireflyCount = 65;
+      const fireflyCount = 70;
       const ffPositions = new Float32Array(fireflyCount * 3);
       const ffPhases = new Float32Array(fireflyCount);
       for (let i = 0; i < fireflyCount; i++) {
-        ffPositions[i * 3] = 6 + Math.random() * 18;
-        ffPositions[i * 3 + 1] = 0.4 + Math.random() * 3.2;
-        ffPositions[i * 3 + 2] = 10 - Math.random() * 65;
+        ffPositions[i * 3] = (Math.random() - 0.35) * 32;
+        ffPositions[i * 3 + 1] = 0.4 + Math.random() * 3.4;
+        ffPositions[i * 3 + 2] = 10 - Math.random() * 62;
         ffPhases[i] = Math.random() * Math.PI * 2;
       }
       const ffGeo = new THREE.BufferGeometry();
@@ -1864,7 +2197,6 @@
       const fireflyPoints = new THREE.Points(ffGeo, ffMat);
       scene.add(fireflyPoints);
 
-      // Rolling Low River Mist Billboards
       const mistSprites = [];
       const mistTex = createRadialGlowTexture('rgba(40, 68, 91, 0.16)', 'rgba(7, 17, 31, 0.05)');
       for (let m = 0; m < 22; m++) {
@@ -1884,25 +2216,33 @@
       // 8. 75-SECOND CINEMATIC CAMERA SPLINE CHOREOGRAPHY
       // =========================================================================
       const camPosSpline = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(0.0,  1.15, 16.0), // 00s: Low water reveal
-        new THREE.Vector3(1.2,  1.35,  6.0), // 15s: Gliding toward distant lantern & ghat
-        new THREE.Vector3(2.4,  1.50, -3.5), // 30s: Watching the passing dingi nouka & majhi
-        new THREE.Vector3(1.5,  1.65, -8.5), // 45s: Panning toward distant launch horn & village lights
-        new THREE.Vector3(0.4,  1.35,  4.0), // 62s: Settling back over moonlit river for end credits
-        new THREE.Vector3(0.0,  1.15, 16.0)  // 75s: Exact seamless loop return
+        new THREE.Vector3(0.0,  1.20, 16.0), // 00s: Open South water reveal (দক্ষিণে খোলা)
+        new THREE.Vector3(1.5,  1.45,  5.5), // 15s: Gliding between West Bamboo & East Ducks
+        new THREE.Vector3(2.2,  1.55, -2.5), // 30s: Passing Boat, East Duck Coop & North Banana Grove
+        new THREE.Vector3(0.8,  1.65, -7.5), // 45s: Panning toward distant launch horn & homestead
+        new THREE.Vector3(0.2,  1.35,  4.5), // 62s: Settling back over open southern river for end credits
+        new THREE.Vector3(0.0,  1.20, 16.0)  // 75s: Exact seamless loop return
       ]);
 
       const camLookSpline = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(-8.0,  1.2, -32.0),
-        new THREE.Vector3(-10.0, 1.1, -30.0),
-        new THREE.Vector3(1.0,   0.9, -16.5),
-        new THREE.Vector3(10.0,  1.4, -34.0),
-        new THREE.Vector3(16.0,  1.1, -42.0),
-        new THREE.Vector3(-8.0,  1.2, -32.0)
+        new THREE.Vector3(-4.0,  1.2, -32.0),
+        new THREE.Vector3(-6.0,  1.1, -26.0),
+        new THREE.Vector3(6.0,   1.0, -18.0),
+        new THREE.Vector3(8.0,   1.5, -34.0),
+        new THREE.Vector3(10.0,  1.1, -40.0),
+        new THREE.Vector3(-4.0,  1.2, -32.0)
       ]);
 
+      // 3D Anchor Coordinates for Khanar Bachan Vastu Pins
+      const vastuAnchors = {
+        east:  new THREE.Vector3(13.8, 2.2, -15.0), // পূর্বে হাঁস
+        west:  new THREE.Vector3(-15.5, 3.8, -23.0), // পশ্চিমে বাঁশ
+        north: new THREE.Vector3(10.5, 4.4, -34.0), // উত্তরে কলা
+        south: new THREE.Vector3(0.0,  0.9,  -6.5)  // দক্ষিণে খোলা
+      };
+
       // =========================================================================
-      // 9. UI CONTROLS, TIMELINE SCRUBBER & KEYBOARD ACCESSIBILITY
+      // 9. UI CONTROLS, KHANAR BACHAN COMPASS, TIMELINE & KEYBOARD ACCESSIBILITY
       // =========================================================================
       const openingOverlay = document.getElementById('opening-overlay');
       const enterBtn = document.getElementById('enter-river-btn');
@@ -1910,9 +2250,17 @@
       const endCreditOverlay = document.getElementById('end-credit-overlay');
       const fadeCurtain = document.getElementById('fade-curtain');
       const exploreHint = document.getElementById('explore-hint');
+      const vastuBanner = document.getElementById('vastu-banner');
+      const vastuMarkersLayer = document.getElementById('vastu-markers-layer');
+
+      const pinEast = document.getElementById('pin-east');
+      const pinWest = document.getElementById('pin-west');
+      const pinNorth = document.getElementById('pin-north');
+      const pinSouth = document.getElementById('pin-south');
 
       const btnCinematic = document.getElementById('btn-cinematic');
       const btnExplore = document.getElementById('btn-explore');
+      const btnVastu = document.getElementById('btn-vastu');
       const btnSound = document.getElementById('btn-sound');
       const soundLabel = document.getElementById('sound-label');
       const btnReplay = document.getElementById('btn-replay');
@@ -1920,6 +2268,11 @@
       const btnCredits = document.getElementById('btn-credits');
       const btnHideUi = document.getElementById('btn-hide-ui');
       const hideUiLabel = document.getElementById('hide-ui-label');
+
+      const vastuBtnEast = document.getElementById('vastu-btn-east');
+      const vastuBtnWest = document.getElementById('vastu-btn-west');
+      const vastuBtnNorth = document.getElementById('vastu-btn-north');
+      const vastuBtnSouth = document.getElementById('vastu-btn-south');
 
       const timelineSlider = document.getElementById('timeline-slider');
       const timecodeDisplay = document.getElementById('timecode-display');
@@ -1943,11 +2296,51 @@
         isExploreMode = explore;
         btnCinematic.classList.toggle('active-mode', !explore);
         btnExplore.classList.toggle('active-mode', explore);
-        exploreHint.classList.toggle('visible', explore);
+        exploreHint.classList.toggle('visible', explore && !isVastuCompassActive);
       }
 
       btnCinematic.addEventListener('click', () => setCameraMode(false));
       btnExplore.addEventListener('click', () => setCameraMode(true));
+
+      function toggleVastuCompass() {
+        isVastuCompassActive = !isVastuCompassActive;
+        btnVastu.classList.toggle('active-mode', isVastuCompassActive);
+        vastuBanner.classList.toggle('visible', isVastuCompassActive);
+        vastuMarkersLayer.classList.toggle('visible', isVastuCompassActive);
+        if (isVastuCompassActive) {
+          exploreHint.classList.remove('visible');
+        } else if (isExploreMode) {
+          exploreHint.classList.add('visible');
+        }
+      }
+
+      btnVastu.addEventListener('click', toggleVastuCompass);
+
+      // Directional Focus Buttons inside the Khanar Bachan Compass Banner
+      function focusKhanarDirection(dirKey, yawVal, pitchVal, secTarget) {
+        setCameraMode(true);
+        targetExploreYaw = yawVal;
+        targetExplorePitch = pitchVal;
+        timelineSec = secTarget;
+        timelineSlider.value = secTarget.toFixed(1);
+        [vastuBtnEast, vastuBtnWest, vastuBtnNorth, vastuBtnSouth].forEach((b) => b.classList.remove('active-dir'));
+        if (dirKey === 'east') {
+          vastuBtnEast.classList.add('active-dir');
+          soundEngine.triggerEasternDucksMurmur();
+        } else if (dirKey === 'west') {
+          vastuBtnWest.classList.add('active-dir');
+          soundEngine.triggerBambooTrapLift();
+        } else if (dirKey === 'north') {
+          vastuBtnNorth.classList.add('active-dir');
+        } else if (dirKey === 'south') {
+          vastuBtnSouth.classList.add('active-dir');
+        }
+      }
+
+      vastuBtnEast.addEventListener('click', () => focusKhanarDirection('east', 0.62, 0.02, 24.0));
+      vastuBtnWest.addEventListener('click', () => focusKhanarDirection('west', -0.58, 0.08, 18.0));
+      vastuBtnNorth.addEventListener('click', () => focusKhanarDirection('north', 0.24, 0.12, 34.0));
+      vastuBtnSouth.addEventListener('click', () => focusKhanarDirection('south', 0.0, -0.02, 4.0));
 
       function toggleSound() {
         if (!soundEngine.isInitialized) soundEngine.init();
@@ -1965,6 +2358,7 @@
           timelineSec = 0.0;
           lastOarCycleIndex = -1;
           lastTrapCycleIndex = -1;
+          lastDuckCycleIndex = -1;
           lastHornTriggerCycle = -1;
           lastBird1Cycle = -1;
           lastBird2Cycle = -1;
@@ -2001,7 +2395,6 @@
         if (e.target === creditsModal) creditsModal.classList.remove('open');
       });
 
-      // Timeline Scrubber Events
       timelineSlider.addEventListener('input', (e) => {
         isScrubbing = true;
         timelineSec = parseFloat(e.target.value);
@@ -2010,9 +2403,8 @@
         isScrubbing = false;
       });
 
-      // Pointer & Touch Parallax / Explore Orbit
       window.addEventListener('pointerdown', (e) => {
-        if (e.target.closest('button, a, input, #credits-modal')) return;
+        if (e.target.closest('button, a, input, #credits-modal, #vastu-banner')) return;
         isDragging = true;
         dragStartX = e.clientX;
         dragStartY = e.clientY;
@@ -2024,8 +2416,8 @@
         if (isDragging && isExploreMode) {
           const dx = (e.clientX - dragStartX) * 0.0035;
           const dy = (e.clientY - dragStartY) * 0.0025;
-          targetExploreYaw = Math.max(-0.95, Math.min(0.95, targetExploreYaw - dx));
-          targetExplorePitch = Math.max(-0.12, Math.min(0.38, targetExplorePitch + dy));
+          targetExploreYaw = Math.max(-0.98, Math.min(0.98, targetExploreYaw - dx));
+          targetExplorePitch = Math.max(-0.14, Math.min(0.38, targetExplorePitch + dy));
           dragStartX = e.clientX;
           dragStartY = e.clientY;
         }
@@ -2035,7 +2427,6 @@
         isDragging = false;
       });
 
-      // Keyboard Shortcuts
       window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && creditsModal.classList.contains('open')) {
           creditsModal.classList.remove('open');
@@ -2048,6 +2439,7 @@
         const k = e.key.toLowerCase();
         if (k === 'm') toggleSound();
         else if (k === 'h') toggleUiVisibility();
+        else if (k === 'v') toggleVastuCompass();
         else if (k === 'e') setCameraMode(true);
         else if (k === 'c') setCameraMode(false);
         else if (k === 'f') btnFullscreen.click();
@@ -2070,11 +2462,26 @@
       }
 
       function getChapterTitle(sec) {
-        if (sec < 8) return 'I. THE REVEAL — POST-RAIN STILLNESS';
-        if (sec < 23) return 'II. DISTANT LIGHT — THE GHAT & BAMBOO NETS';
-        if (sec < 42) return 'III. THE PASSING BOAT — THE MAJHI’S PASSAGE';
+        if (sec < 8) return 'I. THE REVEAL — দক্ষিণে খোলা (OPEN SOUTH)';
+        if (sec < 23) return 'II. DISTANT LIGHT — পূর্বে হাঁস • পশ্চিমে বাঁশ';
+        if (sec < 42) return 'III. THE PASSING BOAT — উত্তরে কলা & MAJHI';
         if (sec < 57) return 'IV. THE DISTANT HORN — THE MIDNIGHT LAUNCH';
         return 'V. INTO THE DARKNESS — RECEDING LANTERN';
+      }
+
+      const projVec = new THREE.Vector3();
+      function updatePinScreenPos(pinEl, worldVec) {
+        projVec.copy(worldVec);
+        projVec.project(camera);
+        if (projVec.z > 1.0) {
+          pinEl.style.opacity = '0';
+          return;
+        }
+        const sx = (projVec.x * 0.5 + 0.5) * window.innerWidth;
+        const sy = (-projVec.y * 0.5 + 0.5) * window.innerHeight;
+        pinEl.style.left = `${sx}px`;
+        pinEl.style.top = `${sy}px`;
+        pinEl.style.opacity = '1';
       }
 
       function animate(now) {
@@ -2092,6 +2499,7 @@
             timelineSec -= LOOP_DURATION;
             lastOarCycleIndex = -1;
             lastTrapCycleIndex = -1;
+            lastDuckCycleIndex = -1;
             lastHornTriggerCycle = -1;
             lastBird1Cycle = -1;
             lastBird2Cycle = -1;
@@ -2099,15 +2507,12 @@
           timelineSlider.value = timelineSec.toFixed(1);
         }
 
-        // Update HUD timecode & chapter
         timecodeDisplay.textContent = `${formatTime(timelineSec)} / 01:15`;
         chapterDisplay.textContent = getChapterTitle(timelineSec);
 
-        // End Credits visibility (60s - 71s)
         const showEndCredits = hasEntered && timelineSec >= 60.0 && timelineSec <= 71.0;
         endCreditOverlay.classList.toggle('visible', showEndCredits);
 
-        // Seamless loop fog thickening at start (0-4s) and end (71-75s)
         let fogD = 0.021;
         if (timelineSec < 4.0) {
           fogD = 0.021 + (1.0 - timelineSec / 4.0) * 0.015;
@@ -2117,7 +2522,6 @@
         scene.fog.density = fogD;
         waterUniforms.uFogDensity.value = fogD;
 
-        // Occasional subtle post-monsoon sheet lightning around 49.5s
         let lightning = 0.0;
         if (timelineSec > 49.1 && timelineSec < 49.8) {
           lightning = Math.exp(-Math.pow((timelineSec - 49.42) / 0.14, 2)) * 0.75;
@@ -2141,7 +2545,6 @@
 
         boatGroup.rotation.set(boatPitch, heading, boatRoll);
 
-        // Majhi 8-second rowing cycle with Boitha oar dip + ripple + timber creak SFX
         const oarCyclePos = (timelineSec % 8.0) / 8.0;
         const currentOarIndex = Math.floor(timelineSec / 8.0);
         const oarSweep = Math.sin(oarCyclePos * Math.PI * 2);
@@ -2156,7 +2559,6 @@
           soundEngine.triggerOarAndHullCreak();
         }
 
-        // Swinging Hariken lantern & dual-frequency Perlin-like flame flicker
         lanternSwingGroup.rotation.z = -boatRoll * 1.6 + Math.sin(elapsed * 2.7) * 0.07;
         lanternSwingGroup.rotation.x = Math.cos(elapsed * 2.1) * 0.05;
 
@@ -2175,41 +2577,60 @@
         waterUniforms.uLanternPos.value.copy(worldLanternPos);
 
         // -----------------------------------------------------------------------
-        // B. ANIMATE BAMBOO FISHING TRAP (KHORA JHAL) 18s LIFT-AND-DRIP CYCLE
+        // B. ANIMATE EASTERN DUCKS (পূর্বে হাঁস) & WESTERN BAMBOO TRAP (পশ্চিমে বাঁশ)
         // -----------------------------------------------------------------------
+        duckFlock.forEach((d, idx) => {
+          const angle = elapsed * d.cfg.speed + d.cfg.phase;
+          const dx = d.cfg.cx + Math.cos(angle) * d.cfg.rx;
+          const dz = d.cfg.cz + Math.sin(angle) * d.cfg.rz;
+          const dy = sampleWaveHeight(dx, dz, elapsed);
+          d.mesh.position.set(dx, dy, dz);
+          // Point duck along its swimming tangent
+          const tx = -Math.sin(angle) * d.cfg.rx;
+          const tz = Math.cos(angle) * d.cfg.rz;
+          d.mesh.rotation.y = Math.atan2(-tz, tx);
+          d.mesh.rotation.z = Math.sin(elapsed * 3.2 + idx) * 0.04 * motionScale;
+          if (idx === 0) {
+            waterUniforms.uDuckRipple.value.set(dx, 0, dz, elapsed);
+          }
+        });
+
+        // Periodic soft eastern duck murmur every 14 seconds
+        const currentDuckIndex = Math.floor(timelineSec / 14.0);
+        if (hasEntered && currentDuckIndex !== lastDuckCycleIndex && (timelineSec % 14.0) > 3.5 && timelineSec < 58) {
+          lastDuckCycleIndex = currentDuckIndex;
+          soundEngine.triggerEasternDucksMurmur();
+        }
+
+        // Western Bamboo Fishing Trap (Khora Jhal) 18s lift-and-drip cycle
         const trapCyclePos = (timelineSec % 18.0) / 18.0;
         const currentTrapIndex = Math.floor(timelineSec / 18.0);
-        // Smoothly pivot the cantilevered bamboo frame up out of the water and back down
         const liftAngle = (0.5 - 0.5 * Math.cos(trapCyclePos * Math.PI * 2)) * 0.34;
-        trapFulcrumGroup.rotation.z = -liftAngle;
+        trapFulcrumGroup.rotation.z = liftAngle;
 
         if (hasEntered && currentTrapIndex !== lastTrapCycleIndex && trapCyclePos > 0.35) {
           lastTrapCycleIndex = currentTrapIndex;
-          waterUniforms.uTrapRipple.value.set(10.0, 0, -28.0, elapsed);
+          waterUniforms.uTrapRipple.value.set(-9.5, 0, -24.0, elapsed);
           soundEngine.triggerBambooTrapLift();
         }
 
-        // Moored boat gentle bobbing at the ghat
         mooredBoat.position.y = 0.06 + Math.sin(elapsed * 1.6 + 1.2) * 0.04;
         mooredBoat.rotation.z = Math.cos(elapsed * 1.2) * 0.04;
 
         // -----------------------------------------------------------------------
         // C. ANIMATE DISTANT RIVER LAUNCH, HORN & NIGHT HERON CALLS
         // -----------------------------------------------------------------------
-        // Launch glides across the misty horizon channel
         const launchProgress = (timelineSec - 38.0) / 28.0;
         launchGroup.position.x = -38 + launchProgress * 46;
         searchlightCone.rotation.y = Math.sin(elapsed * 0.55) * 0.38;
         beamMat.opacity = (timelineSec > 34 && timelineSec < 64) ? (0.055 + 0.02 * Math.sin(elapsed * 2.1)) : 0.015;
 
-        // Trigger Deep Distant River-Launch Horn at 42.5s
         const hornCycle = Math.floor(timelineSec / LOOP_DURATION);
         if (hasEntered && timelineSec >= 42.5 && timelineSec < 43.5 && lastHornTriggerCycle !== hornCycle) {
           lastHornTriggerCycle = hornCycle;
           soundEngine.triggerDistantLaunchHorn();
         }
 
-        // Trigger Nocturnal River Bird calls at 28.5s and 48.0s
         if (hasEntered && timelineSec >= 28.5 && timelineSec < 29.5 && lastBird1Cycle !== hornCycle) {
           lastBird1Cycle = hornCycle;
           soundEngine.triggerNightBirdCall();
@@ -2219,19 +2640,22 @@
           soundEngine.triggerNightBirdCall();
         }
 
-        // Update 3D Spatial Audio Panner Coordinates
         soundEngine.updateSpatialPositions(boatGroup.position, trapFulcrumGroup.position, launchGroup.position, timelineSec);
 
         // -----------------------------------------------------------------------
-        // D. ANIMATE FLORA, WATER HYACINTHS, FIREFLIES & CLOUDS
+        // D. ANIMATE WESTERN BAMBOO, NORTHERN BANANA FRONDS, HYACINTHS & FIREFLIES
         // -----------------------------------------------------------------------
         bambooCulms.forEach((b) => {
-          b.mesh.rotation.z = b.baseRotZ + Math.sin(elapsed * 0.9 + b.phase) * 0.025 * motionScale;
+          b.mesh.rotation.z = b.baseRotZ + Math.sin(elapsed * 0.95 + b.phase) * 0.028 * motionScale;
+        });
+
+        bananaFronds.forEach((bf) => {
+          bf.mesh.rotation.x = bf.baseRotX + Math.sin(elapsed * 1.2 + bf.phase) * 0.035 * motionScale;
         });
 
         hyacinthClusters.forEach((hc) => {
-          hc.group.position.z += dt * hc.speed;
-          if (hc.group.position.z > 18) hc.group.position.z = -52;
+          hc.group.position.z -= dt * hc.speed; // Carried northward by the open southern breeze
+          if (hc.group.position.z < -48) hc.group.position.z = 16;
           hc.group.position.y = sampleWaveHeight(hc.group.position.x, hc.group.position.z, elapsed);
         });
 
@@ -2255,7 +2679,7 @@
         });
 
         // -----------------------------------------------------------------------
-        // E. CAMERA CHOREOGRAPHY (CINEMATIC SPLINE vs EXPLORE MODE)
+        // E. CAMERA CHOREOGRAPHY & 3D KHANAR BACHAN MARKER PROJECTION
         // -----------------------------------------------------------------------
         smoothPointerX += (pointerX - smoothPointerX) * 0.04;
         smoothPointerY += (pointerY - smoothPointerY) * 0.04;
@@ -2264,7 +2688,6 @@
         const baseCamPos = camPosSpline.getPointAt(uCam);
         const baseLookTarget = camLookSpline.getPointAt(uCam);
 
-        // Subtle boat-like camera bobbing on the water
         const camBobY = Math.sin(elapsed * 1.25) * 0.045 * motionScale;
 
         if (!isExploreMode) {
@@ -2287,6 +2710,15 @@
           const ly = camera.position.y + Math.sin(explorePitch) * 8.0;
           const lz = camera.position.z - Math.cos(exploreYaw) * lookDist;
           camera.lookAt(lx, ly, lz);
+        }
+
+        camera.updateMatrixWorld();
+
+        if (isVastuCompassActive) {
+          updatePinScreenPos(pinEast, vastuAnchors.east);
+          updatePinScreenPos(pinWest, vastuAnchors.west);
+          updatePinScreenPos(pinNorth, vastuAnchors.north);
+          updatePinScreenPos(pinSouth, vastuAnchors.south);
         }
 
         renderer.render(scene, camera);
