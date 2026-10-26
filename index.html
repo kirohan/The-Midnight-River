@@ -793,17 +793,21 @@
       const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       // =========================================================================
-      // 2. 9-LAYER SPATIAL WEB AUDIO API ENGINE (100% PROCEDURAL)
+      // 2. NATURAL & SOOTHING SPATIAL AMBIENT AUDIO ENGINE (WEB AUDIO API)
       // =========================================================================
       class MidnightRiverSoundEngine {
         constructor() {
           this.ctx = null;
           this.masterGain = null;
           this.reverbNode = null;
+          this.brownNoiseBuffer = null;
+          this.softPinkBuffer = null;
           this.boatPanner = null;
           this.trapPanner = null;
           this.launchPanner = null;
+          this.bankPanner = null;
           this.launchEngineGain = null;
+          this.natureTimer = null;
           this.isInitialized = false;
         }
 
@@ -819,67 +823,90 @@
 
           this.ctx = new AudioCtx();
           this.masterGain = this.ctx.createGain();
-          this.masterGain.gain.setValueAtTime(0.01, this.ctx.currentTime);
+          this.masterGain.gain.setValueAtTime(0.001, this.ctx.currentTime);
           this.masterGain.connect(this.ctx.destination);
 
-          // Fade in master soundscape smoothly over 3.2 seconds
-          this.masterGain.gain.linearRampToValueAtTime(isSoundMuted ? 0.0 : 0.88, this.ctx.currentTime + 3.2);
+          // Gentle, comfortable master volume fade-in over 3.5 seconds
+          this.masterGain.gain.linearRampToValueAtTime(isSoundMuted ? 0.0 : 0.65, this.ctx.currentTime + 3.5);
 
-          // Create 4.8-second river-valley convolution reverb impulse
+          // Warm low-passed outdoor river acoustic impulse (no high-frequency hiss)
           this.reverbNode = this.ctx.createConvolver();
-          this.reverbNode.buffer = this.createRiverImpulseBuffer(4.8, 2.2);
+          this.reverbNode.buffer = this.createWarmRiverImpulseBuffer(3.6, 2.6);
           const reverbGain = this.ctx.createGain();
-          reverbGain.gain.value = 0.48;
+          reverbGain.gain.value = 0.22;
           this.reverbNode.connect(reverbGain);
           reverbGain.connect(this.masterGain);
 
-          // Shared noise buffer (8 seconds of stereo pink-ish noise)
-          this.noiseBuffer = this.createPinkNoiseBuffer(8.0);
+          // Dedicated warm Brownian noise (deep water current) & smoothed Pink noise (soft air/ripples)
+          this.brownNoiseBuffer = this.createBrownNoiseBuffer(10.0);
+          this.softPinkBuffer = this.createSoftPinkNoiseBuffer(10.0);
 
-          // Layer 1: Gentle flowing Padma/Meghna river water
-          this.setupRiverWaterLayer();
-
-          // Layer 2: Small waves lapping against timber hull & ghat
-          this.setupWaveLappingLayer();
-
-          // Layer 3: Soft post-rain nighttime breeze
-          this.setupNightBreezeLayer();
-
-          // Layer 4: Distant crickets & marsh frogs on riverbank
-          this.setupCricketsAndFrogsLayer();
-
-          // Spatial Panners for Dynamic 3D Objects
+          // Spatial Panners for 3D River Elements
           this.boatPanner = this.createSpatialPanner(0, 0, -25);
           this.trapPanner = this.createSpatialPanner(16, 2, -26);
           this.launchPanner = this.createSpatialPanner(-35, 4, -95);
+          this.bankPanner = this.createSpatialPanner(22, 1.5, -18);
 
-          // Layer 8: Distant Launch Diesel Engine Chug (continuous, distance-modulated)
+          // Layer 1: Deep, warm Padma/Meghna river current (Brownian noise + lowpass)
+          this.setupRiverWaterLayer();
+
+          // Layer 2: Soft lapping water along the boat hull & village ghat
+          this.setupWaveLappingLayer();
+
+          // Layer 3: Velvety post-rain midnight breeze
+          this.setupNightBreezeLayer();
+
+          // Layer 4: Intermittent, natural night crickets, marsh frogs & water droplets
+          this.setupCricketsAndFrogsLayer();
+
+          // Layer 8: Distant Launch water-churn & muffled low thrum (active only 36s-60s)
           this.setupLaunchDieselLayer();
 
           this.isInitialized = true;
         }
 
-        createRiverImpulseBuffer(duration, decay) {
+        createWarmRiverImpulseBuffer(duration, decay) {
           const sr = this.ctx.sampleRate;
           const length = Math.floor(sr * duration);
           const impulse = this.ctx.createBuffer(2, length, sr);
           for (let ch = 0; ch < 2; ch++) {
             const data = impulse.getChannelData(ch);
+            let lp = 0;
             for (let i = 0; i < length; i++) {
+              const white = Math.random() * 2 - 1;
+              // One-pole lowpass filter on impulse noise so reverb tail is warm and dark
+              lp = lp * 0.93 + white * 0.07;
               const env = Math.pow(1 - i / length, decay);
-              data[i] = (Math.random() * 2 - 1) * env * 0.5;
+              data[i] = lp * env * 0.65;
             }
           }
           return impulse;
         }
 
-        createPinkNoiseBuffer(duration) {
+        createBrownNoiseBuffer(duration) {
+          const sr = this.ctx.sampleRate;
+          const length = Math.floor(sr * duration);
+          const buf = this.ctx.createBuffer(2, length, sr);
+          for (let ch = 0; ch < 2; ch++) {
+            const out = buf.getChannelData(ch);
+            let lastOut = 0.0;
+            for (let i = 0; i < length; i++) {
+              const white = Math.random() * 2 - 1;
+              lastOut = (lastOut + 0.02 * white) / 1.02;
+              out[i] = lastOut * 0.18;
+            }
+          }
+          return buf;
+        }
+
+        createSoftPinkNoiseBuffer(duration) {
           const sr = this.ctx.sampleRate;
           const length = Math.floor(sr * duration);
           const buf = this.ctx.createBuffer(2, length, sr);
           for (let ch = 0; ch < 2; ch++) {
             const out = buf.getChannelData(ch);
             let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+            let smooth = 0;
             for (let i = 0; i < length; i++) {
               const white = Math.random() * 2 - 1;
               b0 = 0.99886 * b0 + white * 0.0555179;
@@ -888,8 +915,10 @@
               b3 = 0.86650 * b3 + white * 0.3104856;
               b4 = 0.55000 * b4 + white * 0.5329522;
               b5 = -0.7616 * b5 - white * 0.0168980;
-              out[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.035;
+              const raw = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.022;
               b6 = white * 0.115926;
+              smooth = smooth * 0.82 + raw * 0.18;
+              out[i] = smooth;
             }
           }
           return buf;
@@ -899,9 +928,9 @@
           const panner = this.ctx.createPanner();
           panner.panningModel = 'HRTF';
           panner.distanceModel = 'inverse';
-          panner.refDistance = 6;
+          panner.refDistance = 7;
           panner.maxDistance = 140;
-          panner.rolloffFactor = 1.1;
+          panner.rolloffFactor = 1.0;
           panner.setPosition(x, y, z);
           panner.connect(this.masterGain);
           panner.connect(this.reverbNode);
@@ -910,23 +939,25 @@
 
         setupRiverWaterLayer() {
           const src = this.ctx.createBufferSource();
-          src.buffer = this.noiseBuffer;
+          src.buffer = this.brownNoiseBuffer;
           src.loop = true;
 
           const filter = this.ctx.createBiquadFilter();
-          filter.type = 'bandpass';
-          filter.frequency.value = 260;
-          filter.Q.value = 0.7;
+          filter.type = 'lowpass';
+          filter.frequency.value = 210;
+          filter.Q.value = 0.5;
 
           const lfo = this.ctx.createOscillator();
-          lfo.frequency.value = 0.14;
+          lfo.type = 'sine';
+          lfo.frequency.value = 0.08;
           const lfoGain = this.ctx.createGain();
-          lfoGain.gain.value = 95;
-          lfo.connect(filter.frequency);
+          lfoGain.gain.value = 45;
+          lfo.connect(lfoGain);
+          lfoGain.connect(filter.frequency);
           lfo.start();
 
           const gain = this.ctx.createGain();
-          gain.gain.value = 0.26;
+          gain.gain.value = 0.14;
 
           src.connect(filter);
           filter.connect(gain);
@@ -936,22 +967,25 @@
 
         setupWaveLappingLayer() {
           const src = this.ctx.createBufferSource();
-          src.buffer = this.noiseBuffer;
+          src.buffer = this.softPinkBuffer;
           src.loop = true;
 
           const filter = this.ctx.createBiquadFilter();
-          filter.type = 'bandpass';
-          filter.frequency.value = 520;
-          filter.Q.value = 1.8;
+          filter.type = 'lowpass';
+          filter.frequency.value = 340;
+          filter.Q.value = 0.7;
 
+          // Properly scaled LFO -> lfoGain -> gain.gain so wave lapping gently breathes between 0.025 and 0.065
           const lfo = this.ctx.createOscillator();
-          lfo.frequency.value = 0.32;
+          lfo.type = 'sine';
+          lfo.frequency.value = 0.22;
           const lfoGain = this.ctx.createGain();
-          lfoGain.gain.value = 0.08;
+          lfoGain.gain.value = 0.018;
 
           const gain = this.ctx.createGain();
-          gain.gain.value = 0.09;
-          lfo.connect(gain.gain);
+          gain.gain.value = 0.045;
+          lfo.connect(lfoGain);
+          lfoGain.connect(gain.gain);
           lfo.start();
 
           src.connect(filter);
@@ -962,236 +996,305 @@
 
         setupNightBreezeLayer() {
           const src = this.ctx.createBufferSource();
-          src.buffer = this.noiseBuffer;
+          src.buffer = this.softPinkBuffer;
           src.loop = true;
 
-          const filter = this.ctx.createBiquadFilter();
-          filter.type = 'highpass';
-          filter.frequency.value = 680;
+          const highpass = this.ctx.createBiquadFilter();
+          highpass.type = 'highpass';
+          highpass.frequency.value = 160;
 
           const lowpass = this.ctx.createBiquadFilter();
           lowpass.type = 'lowpass';
-          lowpass.frequency.value = 1350;
+          lowpass.frequency.value = 460;
+          lowpass.Q.value = 0.5;
 
           const lfo = this.ctx.createOscillator();
-          lfo.frequency.value = 0.08;
+          lfo.type = 'sine';
+          lfo.frequency.value = 0.06;
           const lfoGain = this.ctx.createGain();
-          lfoGain.gain.value = 340;
-          lfo.connect(lowpass.frequency);
+          lfoGain.gain.value = 110;
+          lfo.connect(lfoGain);
+          lfoGain.connect(lowpass.frequency);
           lfo.start();
 
           const gain = this.ctx.createGain();
-          gain.gain.value = 0.07;
+          gain.gain.value = 0.042;
 
-          src.connect(filter);
-          filter.connect(lowpass);
+          src.connect(highpass);
+          highpass.connect(lowpass);
           lowpass.connect(gain);
           gain.connect(this.masterGain);
           src.start();
         }
 
         setupCricketsAndFrogsLayer() {
-          // High-frequency rhythmic cricket stridulation on the right riverbank
-          const cricketOsc = this.ctx.createOscillator();
-          cricketOsc.type = 'sine';
-          cricketOsc.frequency.value = 4320;
-
-          const pulseLfo = this.ctx.createOscillator();
-          pulseLfo.type = 'sine';
-          pulseLfo.frequency.value = 14.5;
-
-          const pulseGain = this.ctx.createGain();
-          pulseGain.gain.value = 0.012;
-          pulseLfo.connect(pulseGain.gain);
-
-          const bankPanner = this.createSpatialPanner(22, 1.5, -18);
-          cricketOsc.connect(pulseGain);
-          pulseGain.connect(bankPanner);
-
-          cricketOsc.start();
-          pulseLfo.start();
+          // Intermittent, gentle natural night sounds (no continuous high-frequency sine wave!)
+          if (this.natureTimer) clearInterval(this.natureTimer);
+          this.natureTimer = setInterval(() => {
+            if (!this.isInitialized || isSoundMuted || !this.ctx || this.ctx.state !== 'running') return;
+            const r = Math.random();
+            if (r < 0.45) {
+              this.triggerSoftWaterDroplet(this.boatPanner, 0.010);
+            } else if (r < 0.78) {
+              this.triggerSoftCricketChirp();
+            } else {
+              this.triggerDistantFrogCroak();
+            }
+          }, 2600);
         }
 
-        setupLaunchDieselLayer() {
-          // Low marine diesel engine chug (42 Hz triangle modulated at 5.5 Hz)
+        triggerSoftWaterDroplet(targetNode, peakGain = 0.011) {
+          if (!this.isInitialized || isSoundMuted) return;
+          const now = this.ctx.currentTime;
+          const baseFreq = 420 + Math.random() * 190;
           const osc = this.ctx.createOscillator();
-          osc.type = 'sawtooth';
-          osc.frequency.value = 41.0;
-
-          const chugLfo = this.ctx.createOscillator();
-          chugLfo.type = 'sine';
-          chugLfo.frequency.value = 5.2;
-          const chugDepth = this.ctx.createGain();
-          chugDepth.gain.value = 0.035;
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(baseFreq, now);
+          osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.38, now + 0.055);
 
           const lp = this.ctx.createBiquadFilter();
           lp.type = 'lowpass';
-          lp.frequency.value = 115;
+          lp.frequency.value = 900;
 
-          this.launchEngineGain = this.ctx.createGain();
-          this.launchEngineGain.gain.value = 0.001;
+          const g = this.ctx.createGain();
+          g.gain.setValueAtTime(0.0001, now);
+          g.gain.linearRampToValueAtTime(peakGain, now + 0.012);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 0.075);
 
-          chugLfo.connect(chugDepth);
           osc.connect(lp);
-          lp.connect(this.launchEngineGain);
-          this.launchEngineGain.connect(this.launchPanner);
-
-          osc.start();
-          chugLfo.start();
+          lp.connect(g);
+          g.connect(targetNode || this.masterGain);
+          osc.start(now);
+          osc.stop(now + 0.08);
         }
 
-        // Trigger Layer 6: Wooden Hull Creak + Majhi Oar Water Plunge
+        triggerSoftCricketChirp() {
+          if (!this.isInitialized || isSoundMuted) return;
+          const now = this.ctx.currentTime;
+          const baseFreq = 2780 + Math.random() * 240;
+          const pulses = 2 + Math.floor(Math.random() * 2);
+          for (let p = 0; p < pulses; p++) {
+            const t0 = now + p * 0.055;
+            const osc = this.ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(baseFreq, t0);
+            osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.96, t0 + 0.032);
+
+            const g = this.ctx.createGain();
+            g.gain.setValueAtTime(0.0001, t0);
+            g.gain.linearRampToValueAtTime(0.0032, t0 + 0.008);
+            g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.034);
+
+            osc.connect(g);
+            g.connect(this.bankPanner);
+            osc.start(t0);
+            osc.stop(t0 + 0.038);
+          }
+        }
+
+        triggerDistantFrogCroak() {
+          if (!this.isInitialized || isSoundMuted) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(175, now);
+          osc.frequency.exponentialRampToValueAtTime(138, now + 0.18);
+
+          const lp = this.ctx.createBiquadFilter();
+          lp.type = 'lowpass';
+          lp.frequency.value = 310;
+
+          const g = this.ctx.createGain();
+          g.gain.setValueAtTime(0.0001, now);
+          g.gain.linearRampToValueAtTime(0.011, now + 0.035);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 0.21);
+
+          osc.connect(lp);
+          lp.connect(g);
+          g.connect(this.bankPanner);
+          osc.start(now);
+          osc.stop(now + 0.23);
+        }
+
+        setupLaunchDieselLayer() {
+          // Warm, muffled distant water-churn (Brownian noise low-passed at 90 Hz, silent outside 36-60s)
+          const src = this.ctx.createBufferSource();
+          src.buffer = this.brownNoiseBuffer;
+          src.loop = true;
+
+          const lp = this.ctx.createBiquadFilter();
+          lp.type = 'lowpass';
+          lp.frequency.value = 90;
+
+          this.launchEngineGain = this.ctx.createGain();
+          this.launchEngineGain.gain.value = 0.0001;
+
+          src.connect(lp);
+          lp.connect(this.launchEngineGain);
+          this.launchEngineGain.connect(this.launchPanner);
+          src.start();
+        }
+
+        // Trigger Layer 6: Gentle Wooden Oar Lock + Warm Water Stroke & Droplets
         triggerOarAndHullCreak() {
           if (!this.isInitialized || isSoundMuted) return;
           const now = this.ctx.currentTime;
 
-          // 1. Timber hull creak (resonant stick-slip groan 245 Hz -> 190 Hz)
+          // 1. Mellow wooden oar-lock thud/creak (warm low-passed sine/triangle)
           const osc = this.ctx.createOscillator();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(248, now);
-          osc.frequency.exponentialRampToValueAtTime(188, now + 0.85);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(155, now);
+          osc.frequency.exponentialRampToValueAtTime(112, now + 0.45);
 
-          const filter = this.ctx.createBiquadFilter();
-          filter.type = 'bandpass';
-          filter.frequency.value = 260;
-          filter.Q.value = 4.5;
+          const lp = this.ctx.createBiquadFilter();
+          lp.type = 'lowpass';
+          lp.frequency.value = 220;
 
           const creakGain = this.ctx.createGain();
-          creakGain.gain.setValueAtTime(0.001, now);
-          creakGain.gain.linearRampToValueAtTime(0.085, now + 0.18);
-          creakGain.gain.exponentialRampToValueAtTime(0.0008, now + 0.95);
+          creakGain.gain.setValueAtTime(0.0001, now);
+          creakGain.gain.linearRampToValueAtTime(0.026, now + 0.08);
+          creakGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.50);
 
-          osc.connect(filter);
-          filter.connect(creakGain);
+          osc.connect(lp);
+          lp.connect(creakGain);
           creakGain.connect(this.boatPanner);
           osc.start(now);
-          osc.stop(now + 1.0);
+          osc.stop(now + 0.55);
 
-          // 2. Oar water plunge splash (0.3s after creak begins)
+          // 2. Smooth, warm water paddle swirl
           const splashSrc = this.ctx.createBufferSource();
-          splashSrc.buffer = this.noiseBuffer;
+          splashSrc.buffer = this.brownNoiseBuffer;
 
           const splashFilter = this.ctx.createBiquadFilter();
-          splashFilter.type = 'bandpass';
-          splashFilter.frequency.setValueAtTime(680, now + 0.25);
-          splashFilter.frequency.exponentialRampToValueAtTime(290, now + 1.15);
-          splashFilter.Q.value = 1.6;
+          splashFilter.type = 'lowpass';
+          splashFilter.frequency.setValueAtTime(420, now + 0.18);
+          splashFilter.frequency.exponentialRampToValueAtTime(180, now + 1.15);
 
           const splashGain = this.ctx.createGain();
-          splashGain.gain.setValueAtTime(0.001, now + 0.25);
-          splashGain.gain.linearRampToValueAtTime(0.22, now + 0.42);
-          splashGain.gain.exponentialRampToValueAtTime(0.001, now + 1.25);
+          splashGain.gain.setValueAtTime(0.0001, now + 0.18);
+          splashGain.gain.linearRampToValueAtTime(0.065, now + 0.42);
+          splashGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.25);
 
           splashSrc.connect(splashFilter);
           splashFilter.connect(splashGain);
           splashGain.connect(this.boatPanner);
-          splashSrc.start(now + 0.25, Math.random() * 3.0, 1.1);
+          splashSrc.start(now + 0.18, Math.random() * 4.0, 1.15);
+
+          // 3. Delicate water droplets trailing the oar blade
+          setTimeout(() => this.triggerSoftWaterDroplet(this.boatPanner, 0.009), 520);
+          setTimeout(() => this.triggerSoftWaterDroplet(this.boatPanner, 0.007), 760);
         }
 
-        // Trigger Layer 7: Subtle Kerosene Lantern Glass/Wire Clink
+        // Trigger Layer 7: Subtle Kerosene Lantern Sway Chime
         triggerLanternClink() {
           if (!this.isInitialized || isSoundMuted) return;
           const now = this.ctx.currentTime;
           const osc = this.ctx.createOscillator();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(2780, now);
-          osc.frequency.exponentialRampToValueAtTime(2420, now + 0.09);
+          osc.frequency.setValueAtTime(1140, now);
+          osc.frequency.exponentialRampToValueAtTime(980, now + 0.07);
 
           const gain = this.ctx.createGain();
-          gain.gain.setValueAtTime(0.0005, now);
-          gain.gain.linearRampToValueAtTime(0.015, now + 0.01);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.linearRampToValueAtTime(0.0035, now + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
 
           osc.connect(gain);
           gain.connect(this.boatPanner);
           osc.start(now);
-          osc.stop(now + 0.12);
+          osc.stop(now + 0.09);
         }
 
-        // Trigger Layer 7b: Bamboo Fishing Trap (Khora Jhal) Lift Creak & Net Water Drip
+        // Trigger Layer 7b: Bamboo Fishing Trap (Khora Jhal) Gentle Wood Flex & Water Trickle
         triggerBambooTrapLift() {
           if (!this.isInitialized || isSoundMuted) return;
           const now = this.ctx.currentTime;
 
-          // Hollow bamboo tension flex
+          // Warm hollow bamboo wood flex (sine wave, no harsh sawtooth)
           const osc = this.ctx.createOscillator();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(480, now);
-          osc.frequency.exponentialRampToValueAtTime(340, now + 0.65);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(210, now);
+          osc.frequency.exponentialRampToValueAtTime(158, now + 0.55);
 
-          const bp = this.ctx.createBiquadFilter();
-          bp.type = 'bandpass';
-          bp.frequency.value = 510;
-          bp.Q.value = 6.0;
+          const lp = this.ctx.createBiquadFilter();
+          lp.type = 'lowpass';
+          lp.frequency.value = 260;
 
           const gain = this.ctx.createGain();
-          gain.gain.setValueAtTime(0.001, now);
-          gain.gain.linearRampToValueAtTime(0.045, now + 0.15);
-          gain.gain.exponentialRampToValueAtTime(0.0005, now + 0.7);
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.linearRampToValueAtTime(0.020, now + 0.14);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.60);
 
-          osc.connect(bp);
-          bp.connect(gain);
+          osc.connect(lp);
+          lp.connect(gain);
           gain.connect(this.trapPanner);
           osc.start(now);
-          osc.stop(now + 0.75);
+          osc.stop(now + 0.65);
 
-          // Water droplets trickling from lifted mesh net
+          // Soft water trickle from lifted net
           const dripSrc = this.ctx.createBufferSource();
-          dripSrc.buffer = this.noiseBuffer;
-          const dripBp = this.ctx.createBiquadFilter();
-          dripBp.type = 'bandpass';
-          dripBp.frequency.value = 1150;
-          dripBp.Q.value = 3.2;
+          dripSrc.buffer = this.softPinkBuffer;
+          const dripLp = this.ctx.createBiquadFilter();
+          dripLp.type = 'lowpass';
+          dripLp.frequency.value = 440;
 
           const dripGain = this.ctx.createGain();
-          dripGain.gain.setValueAtTime(0.001, now + 0.4);
-          dripGain.gain.linearRampToValueAtTime(0.09, now + 0.8);
-          dripGain.gain.exponentialRampToValueAtTime(0.001, now + 2.1);
+          dripGain.gain.setValueAtTime(0.0001, now + 0.35);
+          dripGain.gain.linearRampToValueAtTime(0.032, now + 0.75);
+          dripGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.9);
 
-          dripSrc.connect(dripBp);
-          dripBp.connect(dripGain);
+          dripSrc.connect(dripLp);
+          dripLp.connect(dripGain);
           dripGain.connect(this.trapPanner);
-          dripSrc.start(now + 0.4, 1.0, 1.8);
+          dripSrc.start(now + 0.35, Math.random() * 3.0, 1.6);
+
+          setTimeout(() => this.triggerSoftWaterDroplet(this.trapPanner, 0.008), 600);
+          setTimeout(() => this.triggerSoftWaterDroplet(this.trapPanner, 0.006), 950);
         }
 
-        // Trigger Layer 5: Nocturnal River Bird Call (Nishibok / Night Heron)
+        // Trigger Layer 5: Mellow Distant Nocturnal Bird Call
         triggerNightBirdCall() {
           if (!this.isInitialized || isSoundMuted) return;
           const now = this.ctx.currentTime;
           const osc = this.ctx.createOscillator();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(1060, now);
-          osc.frequency.exponentialRampToValueAtTime(760, now + 0.75);
-
-          const gain = this.ctx.createGain();
-          gain.gain.setValueAtTime(0.001, now);
-          gain.gain.linearRampToValueAtTime(0.038, now + 0.12);
-          gain.gain.exponentialRampToValueAtTime(0.0005, now + 0.85);
-
-          osc.connect(gain);
-          gain.connect(this.reverbNode);
-          osc.start(now);
-          osc.stop(now + 0.9);
-        }
-
-        // Trigger Layer 9: Deep Distant Bangladeshi River-Launch Horn (at 42.5s)
-        triggerDistantLaunchHorn() {
-          if (!this.isInitialized || isSoundMuted) return;
-          const now = this.ctx.currentTime;
-          const freqs = [32.70, 65.41, 98.00, 130.81]; // C1 sub, C2, G2, C3 brassy launch chord
-          const weights = [0.45, 0.55, 0.35, 0.18];
+          osc.frequency.setValueAtTime(560, now);
+          osc.frequency.exponentialRampToValueAtTime(430, now + 0.65);
 
           const lp = this.ctx.createBiquadFilter();
           lp.type = 'lowpass';
-          lp.frequency.setValueAtTime(295, now);
-          lp.frequency.linearRampToValueAtTime(340, now + 1.5);
-          lp.frequency.exponentialRampToValueAtTime(160, now + 5.2);
+          lp.frequency.value = 680;
+
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.linearRampToValueAtTime(0.014, now + 0.15);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.75);
+
+          osc.connect(lp);
+          lp.connect(gain);
+          gain.connect(this.reverbNode);
+          osc.start(now);
+          osc.stop(now + 0.8);
+        }
+
+        // Trigger Layer 9: Warm, Mellow Distant River-Launch Foghorn (at 42.5s)
+        triggerDistantLaunchHorn() {
+          if (!this.isInitialized || isSoundMuted) return;
+          const now = this.ctx.currentTime;
+          const freqs = [65.41, 98.00, 130.81]; // Warm C2, G2, C3 distant horn triad
+          const weights = [0.45, 0.35, 0.15];
+
+          const lp = this.ctx.createBiquadFilter();
+          lp.type = 'lowpass';
+          lp.frequency.setValueAtTime(165, now);
+          lp.frequency.linearRampToValueAtTime(195, now + 1.4);
+          lp.frequency.exponentialRampToValueAtTime(120, now + 4.8);
 
           const hornGain = this.ctx.createGain();
           hornGain.gain.setValueAtTime(0.0001, now);
-          hornGain.gain.linearRampToValueAtTime(0.24, now + 0.65);
-          hornGain.gain.setValueAtTime(0.22, now + 2.3);
-          hornGain.gain.exponentialRampToValueAtTime(0.0005, now + 5.5);
+          hornGain.gain.linearRampToValueAtTime(0.055, now + 0.85);
+          hornGain.gain.setValueAtTime(0.048, now + 2.2);
+          hornGain.gain.exponentialRampToValueAtTime(0.0001, now + 5.0);
 
           lp.connect(hornGain);
           hornGain.connect(this.launchPanner);
@@ -1199,14 +1302,14 @@
 
           freqs.forEach((f, idx) => {
             const osc = this.ctx.createOscillator();
-            osc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle';
-            osc.frequency.setValueAtTime(f * (1 + (idx - 1.5) * 0.002), now);
+            osc.type = idx === 0 ? 'triangle' : 'sine';
+            osc.frequency.setValueAtTime(f * (1 + (idx - 1) * 0.0015), now);
             const oscGain = this.ctx.createGain();
             oscGain.gain.value = weights[idx];
             osc.connect(oscGain);
             oscGain.connect(lp);
             osc.start(now);
-            osc.stop(now + 5.6);
+            osc.stop(now + 5.1);
           });
         }
 
@@ -1221,14 +1324,13 @@
           if (this.launchPanner) {
             this.launchPanner.setPosition(launchPos.x, launchPos.y, launchPos.z);
           }
-          // Modulate distant launch diesel chug audible window (36s - 60s)
           if (this.launchEngineGain) {
-            let chugLevel = 0.001;
+            let chugLevel = 0.0001;
             if (timelineSec > 36 && timelineSec < 60) {
               const norm = Math.sin(((timelineSec - 36) / 24) * Math.PI);
-              chugLevel = 0.001 + Math.max(0, norm) * 0.065;
+              chugLevel = 0.0001 + Math.max(0, norm) * 0.018;
             }
-            this.launchEngineGain.gain.setTargetAtTime(chugLevel, this.ctx.currentTime, 0.2);
+            this.launchEngineGain.gain.setTargetAtTime(chugLevel, this.ctx.currentTime, 0.25);
           }
         }
 
@@ -1236,7 +1338,7 @@
           if (!this.isInitialized) return;
           const now = this.ctx.currentTime;
           this.masterGain.gain.cancelScheduledValues(now);
-          this.masterGain.gain.setTargetAtTime(muted ? 0.0 : 0.88, now, 0.25);
+          this.masterGain.gain.setTargetAtTime(muted ? 0.0 : 0.65, now, 0.25);
         }
       }
 
