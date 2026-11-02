@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#030a12" />
+  <meta name="description" content="Nishith Nodi — The Midnight River. An immersive cinematic journey by Bad Time Studio, created by K.I.Rohan." />
+  <title>নিশীথ নদী — The Midnight River | Bad Time Studio</title>
+  <link rel="preload" as="image" href="./assets/bad-time-studio-logo.png" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main id="experience" aria-label="Nishith Nodi immersive river experience">
+    <canvas id="river-canvas" aria-label="Animated midnight river scene"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="topbar" id="topbar">
+      <div class="topbar-brand">
+        <span class="brand-dot"></span>
+        <span>BAD TIME STUDIO</span>
+        <span class="topbar-divider">/</span>
+        <span class="topbar-edition">FIELD NOTE 001</span>
+      </div>
+      <div class="topbar-right">
+        <div class="visit-counter" aria-label="Total river visits"><span class="visit-counter-label">RIVER VISITS</span><div class="counterapi" aria-live="polite" aria-label="Total page visits"></div></div>
+        <div class="time-readout"><span class="time-dot"></span><span id="time-label">12:17 AM</span><span class="time-separator">·</span><span id="phase-label">AFTER RAIN</span></div>
+      </div>
+    </header>
+
+    <section class="intro-screen" id="intro-screen" aria-labelledby="main-title">
+      <div class="intro-content">
+        <p class="eyebrow intro-eyebrow"><span class="eyebrow-line"></span> BAD TIME STUDIO PRESENTS <span class="eyebrow-line"></span></p>
+        <div class="logo-window" aria-label="Bad Time Studio logo">
+          <img src="./assets/bad-time-studio-logo.png" alt="Bad Time Studio — Your competitors are not going to like this" class="studio-logo" />
+        </div>
+        <p class="intro-kicker">A CINEMATIC EXPERIENCE</p>
+        <h1 id="main-title" class="main-title" lang="bn">নিশীথ নদী</h1>
+        <p class="english-title">THE MIDNIGHT RIVER</p>
+        <p class="intro-subtitle">“Somewhere in Bangladesh, the river never sleeps.”</p>
+        <button class="enter-button" id="enter-button" type="button">
+          <span class="enter-button-text">ENTER THE RIVER</span><span class="enter-arrow" aria-hidden="true">↗</span>
+        </button>
+        <p class="game-invite">EXPLORE MODE · DISCOVER 10 HIDDEN DETAILS</p>
+        <p class="creator-credit">A CINEMATIC EXPERIENCE BY <span>K.I.ROHAN</span></p>
+        <div class="intro-links">
+          <a href="https://facebook.com/badTimeStudio/" target="_blank" rel="noopener noreferrer">BAD TIME STUDIO <span aria-hidden="true">↗</span></a>
+          <span class="link-separator"></span>
+          <a href="https://www.linkedin.com/in/kirohan/" target="_blank" rel="noopener noreferrer">K.I.ROHAN <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+      <div class="intro-bottom-note"><span>22° 49′ N</span><span class="note-line"></span><span>89° 32′ E · BANGLADESH</span></div>
+      <div class="intro-scroll-note"><span class="scroll-line"></span> A QUIET JOURNEY AFTER DARK · EXPLORE THE RIVER</div>
+    </section>
+
+    <div class="cinema-caption" id="cinema-caption" aria-live="polite">
+      <span class="caption-rule"></span>
+      <div><p id="caption-kicker">THE RIVER AT REST</p><p id="caption-line">Listen closely. The night is never silent.</p></div>
+    </div>
+
+    <section class="end-credit" id="end-credit" aria-hidden="true">
+      <p class="end-credit-studio">BAD TIME STUDIO</p>
+      <p class="end-credit-presents">presents</p>
+      <p class="end-credit-bengali" lang="bn">নিশীথ নদী</p>
+      <p class="end-credit-title">THE MIDNIGHT RIVER</p>
+      <p class="end-credit-created">Created by <span>K.I.ROHAN</span></p>
+    </section>
+
+    <nav class="control-dock" id="control-dock" aria-label="Experience controls" hidden>
+      <button class="dock-button mode-button active" id="mode-button" type="button" aria-pressed="false" title="Switch between cinematic and explore mode"><span class="dock-icon">◉</span><span class="dock-label">CINEMATIC</span></button>
+      <span class="dock-separator"></span>
+      <button class="dock-button" id="sound-button" type="button" aria-pressed="true" title="Turn sound off"><span class="dock-icon" id="sound-icon">◖))</span><span class="dock-label" id="sound-label">SOUND ON</span></button>
+      <button class="dock-button" id="soundscape-button" type="button" aria-expanded="false" aria-controls="soundscape-panel" title="Adjust the river soundscape"><span class="dock-icon">≋</span><span class="dock-label">SOUND MIX</span></button>
+      <button class="dock-button" id="journal-button" type="button" aria-expanded="false" aria-controls="journal-panel" title="Open your river journal"><span class="dock-icon">⌕</span><span class="dock-label" id="journal-label">JOURNAL 0/10</span></button>
+      <button class="dock-button" id="replay-button" type="button" title="Replay the cinematic"><span class="dock-icon">↺</span><span class="dock-label">REPLAY</span></button>
+      <button class="dock-button" id="fullscreen-button" type="button" title="Enter fullscreen"><span class="dock-icon">⛶</span><span class="dock-label">FULLSCREEN</span></button>
+      <span class="dock-separator dock-separator-last"></span>
+      <button class="dock-button icon-only" id="credits-button" type="button" title="Open credits"><span class="dock-icon">ⓘ</span><span class="dock-label">CREDITS</span></button>
+      <button class="dock-button icon-only" id="hide-ui-button" type="button" title="Hide interface"><span class="dock-icon">⌁</span><span class="dock-label">HIDE UI</span></button>
+    </nav>
+
+    <button class="restore-ui-button" id="restore-ui-button" type="button" hidden>SHOW INTERFACE <span aria-hidden="true">＋</span></button>
+
+    <div class="progress-wrap" id="progress-wrap" hidden aria-label="Cinematic progress">
+      <span class="progress-start">00:00</span><div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div><span class="progress-end">02:00</span>
+    </div>
+
+    <div class="corner-mark" id="corner-mark" hidden><span class="corner-mark-line"></span><span>NISHITH NODI</span><span class="corner-mark-dot">·</span><span>BAD TIME STUDIO</span></div>
+
+    <div class="interaction-hint" id="interaction-hint" hidden><span class="hint-dot"></span><span>EXPLORE MODE</span><span class="hint-divider">/</span><span>Tap the river, boat, moon and riverbank to discover hidden details.</span></div>
+    <div class="discovery-toast" id="discovery-toast" role="status" aria-live="polite" hidden><span class="toast-mark">✦</span><div><small id="toast-kicker">RIVER JOURNAL UPDATED</small><strong id="toast-title">A quiet discovery</strong><p id="toast-copy">The river has another story.</p></div></div>
+
+    <section class="soundscape-panel" id="soundscape-panel" role="dialog" aria-modal="false" aria-labelledby="soundscape-title" hidden>
+      <button class="panel-close" id="soundscape-close" type="button" aria-label="Close sound mixer">×</button>
+      <p class="panel-eyebrow">LISTEN TO THE NIGHT</p><h2 id="soundscape-title">River soundscape</h2>
+      <p class="panel-description">A quiet mix of water, insects, distant wildlife and the boat. Adjust each layer to your taste.</p>
+      <div class="mixer-row"><label for="river-volume"><span>River water</span><output id="river-volume-value">32%</output></label><input id="river-volume" type="range" min="0" max="100" value="32" /></div>
+      <div class="mixer-row"><label for="insects-volume"><span>Crickets & night life</span><output id="insects-volume-value">14%</output></label><input id="insects-volume" type="range" min="0" max="100" value="14" /></div>
+      <div class="mixer-row"><label for="wildlife-volume"><span>Distant birds</span><output id="wildlife-volume-value">18%</output></label><input id="wildlife-volume" type="range" min="0" max="100" value="18" /></div>
+      <div class="mixer-row"><label for="effects-volume"><span>Boat, water & launch</span><output id="effects-volume-value">25%</output></label><input id="effects-volume" type="range" min="0" max="100" value="25" /></div>
+      <p class="audio-status" id="audio-status" role="status">Sound begins when you enter the river.</p>
+    </section>
+
+    <section class="journal-panel" id="journal-panel" role="dialog" aria-modal="false" aria-labelledby="journal-title" hidden>
+      <button class="panel-close" id="journal-close" type="button" aria-label="Close river journal">×</button>
+      <p class="panel-eyebrow">FIELD NOTES · 12:17 AM</p><h2 id="journal-title">Secrets of the river</h2>
+      <p class="journal-intro">Explore slowly. Tap points of interest in Explore Mode to reveal the stories hidden in the dark.</p>
+      <div class="journal-progress-line"><span id="journal-progress-label">0 of 10 discovered</span><span id="journal-percent">0%</span></div>
+      <div class="journal-progress-track"><span id="journal-progress-fill"></span></div>
+      <div class="journal-list" id="journal-list"></div>
+      <p class="journal-footer">Your discoveries are saved on this device.</p>
+    </section>
+
+    <div class="credits-backdrop" id="credits-backdrop" hidden></div>
+    <section class="credits-panel" id="credits-panel" role="dialog" aria-modal="true" aria-labelledby="credits-title" hidden>
+      <button class="credits-close" id="credits-close" type="button" aria-label="Close credits">×</button>
+      <p class="panel-eyebrow">A BAD TIME STUDIO EXPERIENCE</p>
+      <div class="panel-logo-window"><img src="./assets/bad-time-studio-logo.png" alt="Bad Time Studio logo" /></div>
+      <h2 id="credits-title" lang="bn">নিশীথ নদী</h2>
+      <p class="panel-english-title">THE MIDNIGHT RIVER</p>
+      <div class="credits-rule"></div>
+      <p class="credit-label">CREATED BY</p><p class="credit-name">K.I.ROHAN</p>
+      <div class="credits-links">
+        <a href="https://facebook.com/badTimeStudio/" target="_blank" rel="noopener noreferrer"><span>Bad Time Studio</span><small>Facebook ↗</small></a>
+        <a href="https://www.linkedin.com/in/kirohan/" target="_blank" rel="noopener noreferrer"><span>K.I.Rohan</span><small>LinkedIn ↗</small></a>
+      </div>
+      <p class="panel-footer">MADE WITH PATIENCE · BANGLADESH</p>
+    </section>
+
+    <div class="loading-screen" id="loading-screen" role="status" aria-live="polite">
+      <div class="loading-mark"></div><p>PREPARING THE RIVER</p><div class="loading-bar"><span></span></div>
+    </div>
+    <div class="webgl-fallback" id="webgl-fallback" hidden>
+      <p class="fallback-eyebrow">A NOTE FROM THE RIVER</p><h2>Your browser could not start the 3D scene.</h2><p>Try the latest version of Chrome or Edge with hardware acceleration enabled.</p>
+    </div>
+  </main>
+  <!-- CC0 ambience and one-shot sound effects. Playback starts only after visitor interaction. -->
+  <audio id="river-audio" src="https://sfxmint.com/dl/river-ambience-05.wav" preload="none" loop></audio>
+  <audio id="insect-audio" src="https://sfxmint.com/dl/night-ambience-02.wav" preload="none" loop></audio>
+  <audio id="wildlife-audio" src="https://sfxmint.com/dl/night-ambience-07.mp3" preload="none"></audio>
+  <audio id="horn-audio" src="https://sfxmint.com/dl/ship-horn-06.mp3" preload="none"></audio>
+  <audio id="creak-audio" src="https://sfxmint.com/dl/ship-creak-09.mp3" preload="none"></audio>
+  <audio id="plop-audio" src="https://sfxmint.com/dl/water-plop-01.mp3" preload="none"></audio>
+  <!-- Public, keyless visit counter for this experience. -->
+  <script src="https://counterapi.com/c.js?ns=nishith-nodi-bad-time-studio" async></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
